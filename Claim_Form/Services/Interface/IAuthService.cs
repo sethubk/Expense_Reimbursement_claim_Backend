@@ -4,6 +4,6 @@ namespace Claim_Form.Services.Interface
 {
     public interface IAuthService
     {
-        Task<EmployeeResponseDtos> GetEmployeeAsync(EmployeeLoginDtos dto);
+        Task<object> GetEmployeeAsync(EmployeeLoginDtos dto);
     }
 }
