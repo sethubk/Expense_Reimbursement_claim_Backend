@@ -22,7 +22,7 @@ namespace Claim_Form.Services.Implementations
 
         }
 
-        public async Task<object> GetEmployeeAsync(EmployeeLoginDtos dto)
+        public async Task<EmployeeResponseDtos> GetEmployeeAsync(EmployeeLoginDtos dto)
         {
             var Employee = await _authRepository.GetEmployeeAsync(dto.Email);
             if (Employee == null)
@@ -40,14 +40,19 @@ namespace Claim_Form.Services.Implementations
             }
             var token = GenerateJwtToken(Employee);
 
-            
 
 
-            return new
+
+            return new EmployeeResponseDtos
             {
-               
-                empcode = Employee.EmpCode,
-                name = Employee.Name
+          
+                EmpCode = Employee.EmpCode,
+                Name = Employee.Name,
+                Department = Employee.Department,
+                Role = Employee.Role,
+                Email = Employee.Email,
+                VenderCost = Employee.VenderCost,
+                CostCenter = Employee.CostCenter
             };
 
         }
@@ -60,11 +65,16 @@ namespace Claim_Form.Services.Implementations
           Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
       );
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var claims = new List<Claim> { 
-
-                new Claim(ClaimTypes.Name, employee.Name),
-                new Claim("Empcode",employee.EmpCode)
-            };
+            var claims = new List<Claim>
+{
+    new Claim(ClaimTypes.Name, employee.Name),
+    new Claim("EmpCode", employee.EmpCode),
+    new Claim("Department", employee.Department ?? ""),
+    new Claim(ClaimTypes.Role, employee.Role ?? ""),
+    new Claim(ClaimTypes.Email, employee.Email ?? ""),
+    new Claim("VenderCost", employee.VenderCost ?? ""),
+    new Claim("CostCenter", employee.CostCenter ?? "")
+};
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
