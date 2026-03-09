@@ -2,8 +2,10 @@
 
 namespace Claim_Form.Services.Interface
 {
-    public interface IAuthService
+    public interface IEmployeeService
     {
         Task<EmployeeResponseDtos> GetEmployeeAsync(EmployeeLoginDtos dto);
+        Task<EmpWithClaimDto?> AllEmp(string EmpCode);
+        
     }
 }

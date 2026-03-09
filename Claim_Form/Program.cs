@@ -18,8 +18,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
           options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IAuthRepository,AuthRepository>();
-builder.Services.AddScoped<IAuthService,AuthService>();
+builder.Services.AddScoped<IEmployeeRepository,EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService,EmployeeService>();
+builder.Services.AddScoped<IRecentClaimService, RecentClaimService>();
+builder.Services.AddScoped<IRecentClaimRepository, RecentClaimRepository>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",

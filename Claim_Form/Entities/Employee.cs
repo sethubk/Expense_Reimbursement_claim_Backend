@@ -21,6 +21,7 @@ namespace Claim_Form.Entities
         public string VenderCost { get; set; }
         
         public string CostCenter { get; set; }
+        public ICollection<RecentClaim>? RecentClaims { get; set; }
 
     }
 }

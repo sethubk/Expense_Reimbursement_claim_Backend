@@ -1,6 +1,7 @@
 ﻿using Claim_Form.Data;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
+using Claim_Form.Services.Implementations;
 using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,12 @@ namespace Claim_Form.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class EmployeeController : ControllerBase
     {
-        private readonly IAuthService _service;
+        private readonly IEmployeeService _service;
         private readonly AppDbContext _context;
 
-        public AuthController(IAuthService service,AppDbContext context)
+        public EmployeeController(IEmployeeService service,AppDbContext context)
         {
             _service = service;
             _context=context;
@@ -59,6 +60,15 @@ return BadRequest(ex.Message);
             _context.SaveChanges();
 
             return Ok("Employee Added Successfully");
+        }
+        [HttpGet("Employee/{EmpCode}")]
+
+        public async Task<IActionResult> GetEmployeeClaims(string EmpCode)
+        {
+            var result = await _service.AllEmp(EmpCode);
+            if (result is null) return NotFound();
+
+            return Ok(result);
         }
     }
 }

@@ -10,12 +10,12 @@ using System.Text;
 
 namespace Claim_Form.Services.Implementations
 {
-    public class AuthService:IAuthService
+    public class EmployeeService : IEmployeeService
     {
-        private readonly IAuthRepository _authRepository;
+        private readonly IEmployeeRepository _authRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IConfiguration configuration, IAuthRepository authRepository)
+        public EmployeeService(IConfiguration configuration, IEmployeeRepository authRepository)
         {
             _configuration = configuration;
             _authRepository = authRepository;
@@ -31,8 +31,8 @@ namespace Claim_Form.Services.Implementations
                 throw new Exception("invalid Employeee code");
             }
 
-        
-      
+
+
 
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, Employee.passwordHash))
             {
@@ -45,7 +45,7 @@ namespace Claim_Form.Services.Implementations
 
             return new EmployeeResponseDtos
             {
-          
+
                 EmpCode = Employee.EmpCode,
                 Name = Employee.Name,
                 Department = Employee.Department,
@@ -56,11 +56,12 @@ namespace Claim_Form.Services.Implementations
             };
 
         }
-        private string GenerateJwtToken(Employee employee) {
+        private string GenerateJwtToken(Employee employee)
+        {
 
             //var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
 
-            
+
             var key = new SymmetricSecurityKey(
           Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
       );
@@ -85,6 +86,42 @@ namespace Claim_Form.Services.Implementations
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-            
+
+        public async Task<EmpWithClaimDto?> AllEmp(string EmpCode)
+        {
+            var emp = await _authRepository.GetEmployee(EmpCode);
+            if (emp != null)
+            {
+                var emp1 = await _authRepository.GetEmployeewithClaim(EmpCode);
+
+            }
+            else
+            {
+                throw new Exception("emp not found");
+            }
+
+            return new EmpWithClaimDto
+            {
+                EmpCode = emp.EmpCode,
+                Name = emp.Name,
+                Email = emp.Email,
+                VenderCost = emp.VenderCost,
+                Department = emp.Department,
+                RecentClaims = emp.RecentClaims.Select(c => new RecentClaimDto
+                {
+                    Type = c.Type,
+                    Date = c.Date,
+                    Purpose = c.Purpose,
+                    Amount = c.Amount,
+                    Status = c.Status,
+
+
+                }).ToList()
+
+            };
+        }
     }
+    
 }
+
+
