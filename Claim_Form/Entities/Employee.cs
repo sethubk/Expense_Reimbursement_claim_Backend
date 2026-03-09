@@ -19,7 +19,7 @@ namespace Claim_Form.Entities
         public string Email { get; set; }
 
         public string VenderCost { get; set; }
-
+        
         public string CostCenter { get; set; }
 
     }

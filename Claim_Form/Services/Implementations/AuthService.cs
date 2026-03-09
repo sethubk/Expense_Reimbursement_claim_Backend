@@ -22,7 +22,7 @@ namespace Claim_Form.Services.Implementations
 
         }
 
-        public async Task<object> GetEmployeeAsync(EmployeeLoginDtos dto)
+        public async Task<EmployeeResponseDtos> GetEmployeeAsync(EmployeeLoginDtos dto)
         {
             var Employee = await _authRepository.GetEmployeeAsync(dto.Email);
             if (Employee == null)
@@ -43,16 +43,16 @@ namespace Claim_Form.Services.Implementations
 
 
 
-            return new
+            return new EmployeeResponseDtos
             {
-                token = token,
-                empCode = Employee.EmpCode,
-                name = Employee.Name,
-                department = Employee.Department,
-                role = Employee.Role,
-                email = Employee.Email,
-                venderCost = Employee.VenderCost,
-                costCenter = Employee.CostCenter
+          
+                EmpCode = Employee.EmpCode,
+                Name = Employee.Name,
+                Department = Employee.Department,
+                Role = Employee.Role,
+                Email = Employee.Email,
+                VenderCost = Employee.VenderCost,
+                CostCenter = Employee.CostCenter
             };
 
         }
