@@ -33,7 +33,7 @@ namespace Claim_Form.Controllers
 
 
         [HttpPost("create/{Empcode}")]
-        public async Task<IActionResult> CreateClaimAsync([FromBody]RecentClaimDto dto, string Empcode)
+        public async Task<IActionResult> CreateClaimAsync(RecentClaimDto dto, string Empcode)
         {
             var created = await _recentClaimService.CreateClaimAsync(dto, Empcode);
             return Ok(created);
@@ -44,5 +44,28 @@ namespace Claim_Form.Controllers
         {
             return Ok(await _recentClaimService.UpdateClaimAsync(dto, Empcode, id));
         }
+
+
+        [HttpGet("claims/{empId:guid}")]
+        public async Task<IActionResult> GetClaimByEmpID(Guid empId)
+        {
+            var result = await _recentClaimService.GetClaimByEmpID(empId);
+
+            if (result == null)
+                return NotFound("No claim found for this employee.");
+
+            return Ok(result);
+        }
+        [HttpGet("claimBycode/{Empcode}")]
+        public async Task<IActionResult> GetClaimByEmpCode(string Empcode)
+        {
+            var result = await _recentClaimService.GetClaimByEmpCode(Empcode);
+
+            if (result == null)
+                return NotFound("No claim found for this employee.");
+
+            return Ok(result);
+        }
+
     }
 }

@@ -7,5 +7,6 @@ namespace Claim_Form.Repositories.Interface
         Task<Employee?> GetEmployeeAsync(string Empcode);
          Task<Employee> GetEmployee(string EmpCode);
         Task<Employee?> GetEmployeewithClaim(string EmpCode);
+        Task<Employee> GetEmployeeById(Guid id);
     }
 }

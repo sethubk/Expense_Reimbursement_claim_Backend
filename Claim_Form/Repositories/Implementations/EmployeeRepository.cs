@@ -22,6 +22,10 @@ namespace Claim_Form.Repositories.Implementations
         {
             return await _context.Employees.FirstOrDefaultAsync(e => e.EmpCode == EmpCode);
         }
+        public async Task<Employee> GetEmployeeById(Guid id)
+        {
+            return await _context.Employees.FirstOrDefaultAsync(e => e.Id == id);
+        }
 
         public async Task<Employee?> GetEmployeewithClaim(string EmpCode)
         {

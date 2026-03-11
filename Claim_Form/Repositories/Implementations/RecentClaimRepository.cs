@@ -15,10 +15,11 @@ namespace Claim_Form.Repositories.Implementations
             _context = context;
         }
 
-        public async Task CreateClaimAsync(RecentClaim claim)
+        public async Task<RecentClaim> CreateClaimAsync(RecentClaim claim)
         {
             _context.RecentClaims.Add(claim);
             await _context.SaveChangesAsync();
+            return claim;
 
         }
         public async Task UpdateClaim(RecentClaim claim)
@@ -45,6 +46,18 @@ namespace Claim_Form.Repositories.Implementations
             }
             return claim;
         }
+
+        public async Task<RecentClaim?> GetClaimByEmpIdAsync(Guid empId)
+        {
+            return await _context.RecentClaims
+                .FirstOrDefaultAsync(c => c.EmpId == empId);
+        }
+        public async Task<RecentClaim?> GetClaimByEmpCode(string EmpCode)
+        {
+            return await _context.RecentClaims
+                .FirstOrDefaultAsync(c => c.Employee.EmpCode == EmpCode);
+        }
+
         public async Task<IEnumerable<RecentClaim>> GetClaims()
         {
             return await _context.RecentClaims.ToListAsync();

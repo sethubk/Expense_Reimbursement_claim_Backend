@@ -3,6 +3,7 @@ using Claim_Form.Entities;
 using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using System.Security.Claims;
 
 namespace Claim_Form.Services.Implementations
 {
@@ -16,7 +17,7 @@ namespace Claim_Form.Services.Implementations
             _employeeRepository = employeeRepository;
         }
 
-        public async Task<RecentClaimDto> CreateClaimAsync(RecentClaimDto dto, string EmpCode)
+        public async Task<RecentClaimResponseDto> CreateClaimAsync(RecentClaimDto dto, string EmpCode)
         {
             var emp = await _employeeRepository.GetEmployee(EmpCode);
             if (emp != null)
@@ -30,7 +31,20 @@ namespace Claim_Form.Services.Implementations
                     Status = dto.Status,
                     Amount = dto.Amount,
                 };
-                await _recentRepository.CreateClaimAsync(recent);
+               var claim= await _recentRepository.CreateClaimAsync(recent);
+              
+                var res = new RecentClaimResponseDto
+                {
+                    RecentClaimId = claim.RecentClaimId,
+                    Type = claim.Type,
+                    Date = claim.Date,
+                    Purpose = claim.Purpose,
+                    Status = claim.Status,
+                    Amount = claim.Amount
+
+
+                };
+                return res;
             }
             else
             {
@@ -39,16 +53,7 @@ namespace Claim_Form.Services.Implementations
 
 
 
-            var res = new RecentClaimDto
-            {
-                Type = dto.Type,
-                Date = dto.Date,
-                Purpose = dto.Purpose,
-                Status = dto.Status,
-                Amount = dto.Amount,
-
-            };
-            return res;
+            
         }
         public async Task<RecentClaimDto> UpdateClaimAsync(RecentClaimDto dto, string EmpCode, Guid id)
         {
@@ -108,6 +113,54 @@ namespace Claim_Form.Services.Implementations
                 Amount = claim.Amount,
 
             };
+
+        }
+        public async Task<RecentClaimResponseDto?> GetClaimByEmpID(Guid id)
+        {
+            var emp = await _employeeRepository.GetEmployeeById(id);
+            if (emp != null)
+            {
+                var claim = await _recentRepository.GetClaimByEmpIdAsync(id);
+
+                return claim == null ? null : new RecentClaimResponseDto
+                {
+                    RecentClaimId = claim.RecentClaimId,
+                    Type = claim.Type,
+                    Date = claim.Date,
+                    Purpose = claim.Purpose,
+                    Status = claim.Status,
+                    Amount = claim.Amount,
+
+                };
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+        public async Task<RecentClaimResponseDto?> GetClaimByEmpCode(string Empcode)
+        {
+            var emp = await _employeeRepository.GetEmployee(Empcode);
+            if (emp != null)
+            {
+                var claim = await _recentRepository.GetClaimByEmpCode(Empcode);
+
+                return claim == null ? null : new RecentClaimResponseDto
+                {
+                    RecentClaimId = claim.RecentClaimId,
+                    Type = claim.Type,
+                    Date = claim.Date,
+                    Purpose = claim.Purpose,
+                    Status = claim.Status,
+                    Amount = claim.Amount,
+
+                };
+            }
+            else
+            {
+                return null;
+            }
 
         }
         public async Task<IEnumerable<RecentClaimDto?>> GetClaims()
