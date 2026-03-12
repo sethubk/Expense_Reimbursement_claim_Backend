@@ -32,9 +32,10 @@ namespace Claim_Form.Controllers
         }
 
         [HttpPut("update/{Empcode}/{id}")]
-        public async Task<IActionResult> UpdateClaim([FromBody] RecentClaimDto dto, string Empcode, Guid id)
+        public async Task<IActionResult> UpdateClaim([FromBody] UpdateClaimDto dto, string Empcode, Guid id)
         {
-            return Ok(await _recentClaimService.UpdateClaimAsync(dto, Empcode, id));
+           var result= await _recentClaimService.UpdateClaimAsync(dto, Empcode, id);
+            return Ok(result);
         }
 
 

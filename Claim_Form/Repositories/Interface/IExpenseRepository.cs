@@ -9,5 +9,6 @@ namespace Claim_Form.Repositories.Interface
         Task UpdateExpense(Expense expense);
     
         Task DeleteExpense(Guid id);
+        Task CreateBulkAsync(List<Expense> expenses);
     }
 }

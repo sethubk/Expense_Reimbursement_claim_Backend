@@ -41,7 +41,11 @@ namespace Claim_Form.Repositories.Implementations
             _context.Expenses.Remove(expense);
             await _context.SaveChangesAsync();
         }
-
+        public async Task CreateBulkAsync(List<Expense> expenses)
+        {
+            await _context.Expenses.AddRangeAsync(expenses);
+            await _context.SaveChangesAsync();
+        }
 
     }
 }

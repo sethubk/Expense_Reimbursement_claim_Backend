@@ -3,6 +3,8 @@ using Claim_Form.Entities;
 using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Claim_Form.Services.Implementations
 {
@@ -56,6 +58,41 @@ namespace Claim_Form.Services.Implementations
 
                 };
             }
+        public async Task<IEnumerable<ExpenseDto>> CreateBulkAsync(Guid claimId, List<ExpenseEntryDto> entries)
+        {
+            // (Optional) Validate the claim exists
+            var claim = await _RecentRepository.GetClaim(claimId);
+            if (claim == null) throw new InvalidOperationException("Claim not found.");
+
+            var models = entries.Select(e => new Expense
+            {
+                RecentClaimId = claimId,
+                Amount = e.Amount,
+                Date = e.Date,
+                Particulars = e.Particulars,
+                PaymentMode = e.PaymentMode,
+                Remarks = e.Remarks,
+                SupportingNo = e.SupportingNo,
+                Screenshot = e.Screenshot
+            }).ToList();
+
+            await _ExpenseRepository.CreateBulkAsync(models);
+            return models.Select(e => new ExpenseDto
+            {
+                Amount = e.Amount,
+                Date = e.Date,
+                Particulars =e.Particulars,
+                PaymentMode = e.PaymentMode,
+                Remarks = e.Remarks,
+                SupportingNo = e.SupportingNo,
+                Screenshot = e.Screenshot,
+
+
+
+            }).ToList();
+        }
+        
+       
 
             public async Task<ExpenseDto?> GetExpenseAsync(Guid id)
             {

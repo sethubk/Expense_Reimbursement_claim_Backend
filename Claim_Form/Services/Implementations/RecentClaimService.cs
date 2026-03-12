@@ -56,9 +56,9 @@ namespace Claim_Form.Services.Implementations
 
             
         }
-        public async Task<RecentClaimDto> UpdateClaimAsync(RecentClaimDto dto, string EmpCode, Guid id)
+        public async Task<RecentClaimDto> UpdateClaimAsync(UpdateClaimDto dto, string EmpCode, Guid id)
         {
-            var emp = await _employeeRepository.GetEmployeeAsync(EmpCode);
+            var emp = await _employeeRepository.GetEmployee(EmpCode);
             if (emp != null)
             {
                 var claim = await _recentRepository.GetClaim(id);
