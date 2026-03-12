@@ -2,6 +2,7 @@
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using static Claim_Form.Repositories.Implementations.RecentClaimRepository;
 
 namespace Claim_Form.Repositories.Implementations
@@ -37,15 +38,7 @@ namespace Claim_Form.Repositories.Implementations
             }
             return claim;
         }
-        public async Task<IEnumerable<RecentClaim>> GetClaims(Guid id, Guid empid)
-        {
-            var claim = await _context.RecentClaims.Where(c => c.RecentClaimId == id && c.EmpId == empid).ToListAsync();
-            if (claim == null)
-            {
-                return null;
-            }
-            return claim;
-        }
+       
 
         public async Task<RecentClaim?> GetClaimByEmpIdAsync(Guid empId)
         {
@@ -57,11 +50,14 @@ namespace Claim_Form.Repositories.Implementations
             return await _context.RecentClaims
                 .FirstOrDefaultAsync(c => c.Employee.EmpCode == EmpCode);
         }
-
-        public async Task<IEnumerable<RecentClaim>> GetClaims()
+        public async Task DeleteDraft(string EmpCode)
         {
-            return await _context.RecentClaims.ToListAsync();
+            var Draft = await _context.RecentClaims.Where(e => e.Status == "Draft").ToListAsync();
+            _context.RecentClaims.RemoveRange(Draft);
+            await _context.SaveChangesAsync();
         }
+
+       
     }
 }
 

@@ -3,6 +3,7 @@ using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Services.Implementations;
 using Claim_Form.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -70,5 +71,12 @@ return BadRequest(ex.Message);
 
             return Ok(result);
         }
+        //[Authorize]
+        //[HttpGet("current")]
+        //public IActionResult GetCurrentEmployee()
+        //{
+           
+        //}
     }
 }
+

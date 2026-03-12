@@ -20,12 +20,6 @@ namespace Claim_Form.Repositories.Implementations
             await _context.SaveChangesAsync();
 
         }
-
-        public async Task<IEnumerable<Expense>> GetExpense()
-        {
-            return await _context.Expenses.ToListAsync();
-        }
-
         public async Task<Expense> GetExpenseById(Guid id)
         {
             return await _context.Expenses.FirstOrDefaultAsync(e => e.ExpenseId == id);

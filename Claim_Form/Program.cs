@@ -4,6 +4,7 @@ using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Implementations;
 using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -51,6 +52,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
    });
 
 
+builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+                .AddNegotiate();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -61,7 +64,8 @@ if (app.Environment.IsDevelopment())
 }
 app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAuthorization();
 
 app.MapControllers();

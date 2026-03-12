@@ -24,14 +24,6 @@ namespace Claim_Form.Controllers
             return Ok(claim);
         }
 
-
-        [HttpGet]
-        public async Task<IActionResult> GetClaims()
-        {
-            return Ok(await _recentClaimService.GetClaims());
-        }
-
-
         [HttpPost("create/{Empcode}")]
         public async Task<IActionResult> CreateClaimAsync(RecentClaimDto dto, string Empcode)
         {
@@ -40,7 +32,7 @@ namespace Claim_Form.Controllers
         }
 
         [HttpPut("update/{Empcode}/{id}")]
-        public async Task<IActionResult> UpdateClaim([FromBody]RecentClaimDto dto, string Empcode, Guid id)
+        public async Task<IActionResult> UpdateClaim([FromBody] RecentClaimDto dto, string Empcode, Guid id)
         {
             return Ok(await _recentClaimService.UpdateClaimAsync(dto, Empcode, id));
         }
@@ -60,6 +52,17 @@ namespace Claim_Form.Controllers
         public async Task<IActionResult> GetClaimByEmpCode(string Empcode)
         {
             var result = await _recentClaimService.GetClaimByEmpCode(Empcode);
+
+            if (result == null)
+                return NotFound("No claim found for this employee.");
+
+            return Ok(result);
+        }
+        [HttpDelete("draft/{Empcode}")]
+
+        public async Task<IActionResult>DeleteDraft(string Empcode)
+        {
+            var result = await _recentClaimService.DeleteDraft(Empcode);
 
             if (result == null)
                 return NotFound("No claim found for this employee.");

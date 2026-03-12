@@ -21,14 +21,6 @@ namespace Claim_Form.Controllers
         {
             return Ok(await _expenseService.AddExpense(claimid, dto));
         }
-
-        [HttpGet]
-
-        public async Task<IActionResult> GetExpenses()
-        {
-            return Ok(await _expenseService.GetExpense());
-        }
-
         [HttpGet("id:Guid")]
         public async Task<IActionResult> GetExpenseAsync(Guid id)
         {

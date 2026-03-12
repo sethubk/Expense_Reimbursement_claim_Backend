@@ -7,10 +7,9 @@ namespace Claim_Form.Repositories.Interface
         Task<RecentClaim> CreateClaimAsync(RecentClaim claim);
         Task UpdateClaim(RecentClaim claim) => Task.CompletedTask;
         Task<RecentClaim> GetClaim(Guid id);
-        Task<IEnumerable<RecentClaim>> GetClaims();
-
         Task<RecentClaim?> GetClaimByEmpIdAsync(Guid empId);
 
         Task<RecentClaim?> GetClaimByEmpCode(string EmpCode);
+        Task DeleteDraft(string EmpCode);
     }
 }

@@ -3,6 +3,7 @@ using Claim_Form.Entities;
 using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using System;
 using System.Security.Claims;
 
 namespace Claim_Form.Services.Implementations
@@ -69,13 +70,6 @@ namespace Claim_Form.Services.Implementations
 
 
                     claim.EmpId = emp.Id;
-
-
-
-
-
-
-
 
                     await _recentRepository.UpdateClaim(claim);
                 }
@@ -163,19 +157,27 @@ namespace Claim_Form.Services.Implementations
             }
 
         }
-        public async Task<IEnumerable<RecentClaimDto?>> GetClaims()
+
+        public async Task<bool> DeleteDraft(string EmpCode)
         {
-            var claims = await _recentRepository.GetClaims();
-            return claims.Select(c => new RecentClaimDto
+            var claim = _recentRepository.GetClaimByEmpCode(EmpCode);
+            if (claim == null)
             {
-                Type = c.Type,
-                Date = c.Date,
-                Amount = c.Amount,
-                Status = c.Status,
-            });
-
+                throw new InvalidOperationException("Claim not found");
+            }
+            try
+            {
+               var deleted= _recentRepository.DeleteDraft(EmpCode);
+                
+                    return true; 
+               
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
-
+        
 
     }
 }

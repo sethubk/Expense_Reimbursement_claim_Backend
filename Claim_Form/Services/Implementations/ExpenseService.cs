@@ -57,30 +57,6 @@ namespace Claim_Form.Services.Implementations
                 };
             }
 
-            public async Task<IEnumerable<ExpenseDto>> GetExpense()
-            {
-                try
-                {
-                    var expense = await _ExpenseRepository.GetExpense();
-                    return expense.Select(e => new ExpenseDto
-                    {
-                        Date = e.Date,
-                        SupportingNo = e.SupportingNo,
-                        Particulars = e.Particulars,
-                        PaymentMode = e.PaymentMode,
-                        Amount = e.Amount,
-                        Remarks = e.Remarks,
-                        Screenshot = e.Screenshot,
-
-                    });
-
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
-
             public async Task<ExpenseDto?> GetExpenseAsync(Guid id)
             {
                 try
