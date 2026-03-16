@@ -8,6 +8,6 @@
         public string PaymentMode { get; set; }
         public decimal Amount { get; set; }
         public string Remarks { get; set; }
-        public string Screenshot { get; set; }
+        public byte[] Screenshot { get; set; }
     }
 }

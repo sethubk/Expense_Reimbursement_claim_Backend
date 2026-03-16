@@ -5,7 +5,7 @@ namespace Claim_Form.Services.Interface
 {
     public interface IExpenseService
     {
-        Task<ExpenseDto> AddExpense(Guid claimid, ExpenseDto dto);
+        Task<ExpenseDto> AddExpense(Guid claimid, ExpenseEntryDto dto);
    
         Task<ExpenseDto?> GetExpenseAsync(Guid id);
         Task<ExpenseDto> UpdateExpense(Guid id, ExpenseDto dto);

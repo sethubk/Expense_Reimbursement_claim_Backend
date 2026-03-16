@@ -12,7 +12,7 @@ namespace Claim_Form.Entities
         public string PaymentMode { get; set; }
         public decimal Amount { get; set; }
         public string Remarks { get; set; }
-        public string Screenshot { get; set; }
+        public byte[] Screenshot { get; set; }
 
         public Guid RecentClaimId { get; set; }
         public RecentClaim RecentClaim { get; set; }

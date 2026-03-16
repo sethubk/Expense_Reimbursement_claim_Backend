@@ -24,14 +24,24 @@ namespace Claim_Form.Services.Implementations
                 _logger = logger;
             }
 
-            public async Task<ExpenseDto> AddExpense(Guid claimid, ExpenseDto dto)
+            public async Task<ExpenseDto> AddExpense(Guid claimid, ExpenseEntryDto dto)
             {
                 var claim1 = await _RecentRepository.GetClaim(claimid);
                 if (claim1 == null)
                 {
                     throw new ArgumentNullException(nameof(claim1));
                 }
-                var expense = new Expense
+            byte[] screenshotBytes = null;
+            if (dto.Screenshot != null)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    await dto.Screenshot.CopyToAsync(ms);
+                    screenshotBytes = ms.ToArray();
+                }
+            }
+
+            var expense = new Expense
                 {
                     RecentClaimId = claim1.RecentClaimId,
                     Date = dto.Date,
@@ -40,30 +50,42 @@ namespace Claim_Form.Services.Implementations
                     PaymentMode = dto.PaymentMode,
                     Amount = dto.Amount,
                     Remarks = dto.Remarks,
-                    Screenshot = dto.Screenshot,
+                    Screenshot = screenshotBytes,
 
                 };
                 await _ExpenseRepository.AddExpense(expense);
 
-                return new ExpenseDto
-                {
-                    Date = dto.Date,
-                    SupportingNo = dto.SupportingNo,
-                    Particulars = dto.Particulars,
-                    PaymentMode = dto.PaymentMode,
-                    Amount = dto.Amount,
-                    Remarks = dto.Remarks,
-                    Screenshot = dto.Screenshot,
+            return new ExpenseDto
+            {
+                Date = expense.Date,
+                SupportingNo = expense.SupportingNo,
+                Particulars = expense.Particulars,
+                PaymentMode = expense.PaymentMode,
+                Amount = expense.Amount,
+                Remarks = expense.Remarks,
+                Screenshot = expense.Screenshot
 
 
-                };
+            };
             }
         public async Task<IEnumerable<ExpenseDto>> CreateBulkAsync(Guid claimId, List<ExpenseEntryDto> entries)
         {
             // (Optional) Validate the claim exists
             var claim = await _RecentRepository.GetClaim(claimId);
             if (claim == null) throw new InvalidOperationException("Claim not found.");
+            
+            IFormFile file = entries.FirstOrDefault()?.Screenshot;
 
+            byte[] screenshotBytes = null;
+
+            if (file != null && file.Length > 0)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    await file.CopyToAsync(ms);
+                    screenshotBytes = ms.ToArray();
+                }
+            }
             var models = entries.Select(e => new Expense
             {
                 RecentClaimId = claimId,
@@ -73,7 +95,7 @@ namespace Claim_Form.Services.Implementations
                 PaymentMode = e.PaymentMode,
                 Remarks = e.Remarks,
                 SupportingNo = e.SupportingNo,
-                Screenshot = e.Screenshot
+                Screenshot = screenshotBytes
             }).ToList();
 
             await _ExpenseRepository.CreateBulkAsync(models);
@@ -85,7 +107,7 @@ namespace Claim_Form.Services.Implementations
                 PaymentMode = e.PaymentMode,
                 Remarks = e.Remarks,
                 SupportingNo = e.SupportingNo,
-                Screenshot = e.Screenshot,
+                Screenshot = e.Screenshot
 
 
 

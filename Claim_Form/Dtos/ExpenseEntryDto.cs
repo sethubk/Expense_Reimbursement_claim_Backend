@@ -11,7 +11,7 @@
             public string Remarks { get; set; } = "";
             public string SupportingNo { get; set; } = "";
             public string FileName { get; set; }   // <--- add this if you need it
-            public string? Screenshot { get; set; }      // <--- nullable; allows null
+            public IFormFile Screenshot { get; set; }      // <--- nullable; allows null
        
 
     }

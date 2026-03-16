@@ -18,7 +18,7 @@ namespace Claim_Form.Controllers
         }
 
         [HttpPost("Claim")]
-        public async Task<IActionResult> AddExpenseAsync(Guid claimid, ExpenseDto dto)
+        public async Task<IActionResult> AddExpenseAsync(Guid claimid, ExpenseEntryDto dto)
         {
             return Ok(await _expenseService.AddExpense(claimid, dto));
         }
