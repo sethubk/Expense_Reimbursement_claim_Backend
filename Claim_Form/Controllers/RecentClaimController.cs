@@ -16,7 +16,6 @@ namespace Claim_Form.Controllers
             _recentClaimService = recentClaimService;
         }
 
-
         [HttpGet("id:Guid")]
         public async Task<IActionResult> GetClaim(Guid id)
         {
@@ -37,8 +36,6 @@ namespace Claim_Form.Controllers
            var result= await _recentClaimService.UpdateClaimAsync(dto, Empcode, id);
             return Ok(result);
         }
-
-
         [HttpGet("claims/{empId:guid}")]
         public async Task<IActionResult> GetClaimByEmpID(Guid empId)
         {
@@ -60,7 +57,6 @@ namespace Claim_Form.Controllers
             return Ok(result);
         }
         [HttpDelete("draft/{Empcode}")]
-
         public async Task<IActionResult>DeleteDraft(string Empcode)
         {
             var result = await _recentClaimService.DeleteDraft(Empcode);

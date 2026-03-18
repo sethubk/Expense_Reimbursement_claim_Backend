@@ -32,7 +32,7 @@ namespace Claim_Form.Controllers
                 var created= await _internationalTravelService.AddTravelDetails(claimId, travelDetailsDtos);
 
                 return Ok(created);
-            
+
             }
             catch (Exception ex)
             {

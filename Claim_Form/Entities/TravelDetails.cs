@@ -13,6 +13,8 @@ namespace Claim_Form.Entities
         public string TotalDays { get; set; }
         public Guid RecentClaimId { get; set; }
         public RecentClaim RecentClaim { get; set; }
+
+        
         public List<CashInfo> CardCashEntries { get; set; } = new();
 
     }

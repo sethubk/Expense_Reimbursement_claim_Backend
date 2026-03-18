@@ -17,7 +17,7 @@ namespace Claim_Form.Data
         public DbSet<RecentClaim> RecentClaims { get; set; }
 
         public DbSet<TravelDetails> TravelDetails { get; set; }
-
+        public DbSet<CashInfo> CashInfo { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<RecentClaim>()
@@ -33,7 +33,14 @@ namespace Claim_Form.Data
             modelBuilder.Entity<RecentClaim>()
                 .HasOne(rc => rc.TravelDetails)
                 .WithOne(td => td.RecentClaim)
-                .HasForeignKey<TravelDetails>(td => td.RecentClaimId);
+                .HasForeignKey<TravelDetails>(td => td.RecentClaimId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<TravelDetails>()
+                    .HasMany(td => td.CardCashEntries)
+                    .WithOne(ci => ci.TravelDetails)
+                    .HasForeignKey(ci => ci.id);
+
 
         }
     }

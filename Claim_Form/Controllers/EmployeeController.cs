@@ -25,7 +25,7 @@ namespace Claim_Form.Controllers
 
         [HttpPost("Login")]
 
-        public async Task<IActionResult> Login(EmployeeLoginDtos dto)
+        public async Task<IActionResult>Login(EmployeeLoginDtos dto)
         {
             if (dto == null)
             {
