@@ -12,6 +12,6 @@
         public Employee Employee { get; set; }
 
         public ICollection<Expense> Expenses { get; set; }
-        public ICollection<TravelDetails> TravelDetails { get; set; }
+        public TravelDetails TravelDetails { get; set; }
     }
 }

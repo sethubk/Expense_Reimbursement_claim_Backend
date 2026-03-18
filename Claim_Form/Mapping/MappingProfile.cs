@@ -4,11 +4,12 @@ using Claim_Form.Entities;
 
 namespace Claim_Form.Mapping
 {
-    public class AutoMapper:Profile
+    public class MappingProfile:Profile
     {
-        public AutoMapper() {
+        public MappingProfile() {
             CreateMap<TravelDetails, TravelDetailsDtos>();
             CreateMap<TravelDetailsDtos, TravelDetails>();
+               
         }
     }
 }

@@ -1,4 +1,5 @@
 using Claim_Form.Data;
+using Claim_Form.Mapping;
 using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Implementations;
@@ -25,6 +26,9 @@ builder.Services.AddScoped<IRecentClaimService, RecentClaimService>();
 builder.Services.AddScoped<IRecentClaimRepository, RecentClaimRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IInternationalTravelRepository, InternationalTravelRepository>();
+builder.Services.AddScoped<IInternationalTravelService, InternationalTravelService>();
+builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",

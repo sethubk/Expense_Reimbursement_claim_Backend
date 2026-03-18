@@ -31,9 +31,9 @@ namespace Claim_Form.Data
                 .HasForeignKey(rc => rc.EmpId);
 
             modelBuilder.Entity<RecentClaim>()
-                .HasMany(rc => rc.TravelDetails)
+                .HasOne(rc => rc.TravelDetails)
                 .WithOne(td => td.RecentClaim)
-                .HasForeignKey(td => td.RecentClaimId);
+                .HasForeignKey<TravelDetails>(td => td.RecentClaimId);
 
         }
     }

@@ -1,7 +1,11 @@
-﻿namespace Claim_Form.Entities
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Claim_Form.Entities
 {
-    public class CashDetails
+    [Owned]
+    public class CashInfo
     {
+        
         public string LoadedDate {  get; set; }
         public string Type { get; set; }
         public string  INRRate { get; set; }
