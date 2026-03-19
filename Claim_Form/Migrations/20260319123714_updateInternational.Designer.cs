@@ -4,6 +4,7 @@ using Claim_Form.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Claim_Form.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260319123714_updateInternational")]
+    partial class updateInternational
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,6 +28,7 @@ namespace Claim_Form.Migrations
             modelBuilder.Entity("Claim_Form.Entities.CashInfo", b =>
                 {
                     b.Property<Guid>("id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("INRRate")
@@ -39,11 +43,16 @@ namespace Claim_Form.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("TravelDetailsTravelID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
+
+                    b.HasIndex("TravelDetailsTravelID");
 
                     b.ToTable("CashInfo");
                 });
@@ -205,13 +214,9 @@ namespace Claim_Form.Migrations
 
             modelBuilder.Entity("Claim_Form.Entities.CashInfo", b =>
                 {
-                    b.HasOne("Claim_Form.Entities.TravelDetails", "TravelDetails")
+                    b.HasOne("Claim_Form.Entities.TravelDetails", null)
                         .WithMany("CardCashEntries")
-                        .HasForeignKey("id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TravelDetails");
+                        .HasForeignKey("TravelDetailsTravelID");
                 });
 
             modelBuilder.Entity("Claim_Form.Entities.Expense", b =>

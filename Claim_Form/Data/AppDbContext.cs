@@ -33,8 +33,8 @@ namespace Claim_Form.Data
             modelBuilder.Entity<RecentClaim>()
                 .HasOne(rc => rc.TravelDetails)
                 .WithOne(td => td.RecentClaim)
-                .HasForeignKey<TravelDetails>(td => td.RecentClaimId)
-                .IsRequired(false);
+                .HasForeignKey<TravelDetails>(td => td.RecentClaimId);
+
 
             modelBuilder.Entity<TravelDetails>()
                     .HasMany(td => td.CardCashEntries)

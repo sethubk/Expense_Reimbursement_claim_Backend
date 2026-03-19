@@ -4,6 +4,10 @@ namespace Claim_Form.Repositories.Interface
 {
     public interface IInternationalTravelRepository
     {
-        Task<TravelDetails> AddTravelDetails(TravelDetails travel);
+        Task AddTravelDetails(TravelDetails travel);
+
+        Task<TravelDetails> UpdateTravelDetails(TravelDetails travel);
+        Task<TravelDetails?> GetTravelByClaimId(Guid claimId);
+
     }
 }

@@ -15,7 +15,7 @@ namespace Claim_Form.Entities
         public RecentClaim RecentClaim { get; set; }
 
         
-        public List<CashInfo> CardCashEntries { get; set; } = new();
+        public ICollection<CashInfo> CardCashEntries { get; set; } = new List<CashInfo>();
 
     }
 }

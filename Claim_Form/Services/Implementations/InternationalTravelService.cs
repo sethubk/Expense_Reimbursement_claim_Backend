@@ -30,15 +30,14 @@ namespace Claim_Form.Services.Implementations
             {
                 throw new ArgumentNullException(nameof(claim1));
             }
-            if (claim1.TravelDetails == null)
+            if (claim1.TravelDetails == null )
             {
                 //var travel = _mapper.Map<TravelDetails>(travelDetailsDtos);
                 //travel.RecentClaimId = ClaimID;
                 //var created = await _internationalTravelRepository.AddTravelDetails(travel);
                 //return _mapper.Map<TravelDetailsDtos>(created);
-                var entity = new TravelDetails
+                var travel = new TravelDetails
                 {
-                   
                     CurrecncyType = travelDetailsDtos.CurrencyType,
                     TravelStartDate = travelDetailsDtos.TravelStartDate,
                     TravelEndDate = travelDetailsDtos.TravelEndDate,
@@ -53,13 +52,67 @@ namespace Claim_Form.Services.Implementations
                             TotalLoaded = c.TotalLoaded,
                         }).ToList()
        
-            }; var created = await _internationalTravelRepository.AddTravelDetails(entity);
-                return _mapper.Map<TravelDetailsDtos>(entity);
+            }; 
+               await _internationalTravelRepository.AddTravelDetails(travel);
+                //return _mapper.Map<TravelDetailsDtos>(travel);
+
+                return new TravelDetailsDtos
+                {
+                    TravelID = travel.TravelID,
+                    CurrencyType = travel.CurrecncyType,  // spelling fix
+                    TravelStartDate = travel.TravelStartDate,
+                    TravelEndDate = travel.TravelEndDate,
+                    TotalDays = travel.TotalDays,
+                    RecentClaimId = travel.RecentClaimId,
+
+                    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
+                    {
+                        LoadedDate = c.TotalLoaded,
+                        Type = c.Type,
+                        INRRate = c.INRRate,
+                        TotalLoaded = c.TotalLoaded,
+                    }).ToList()
+                };
+
             }
-           
+
             else
             {
-                return null;
+
+                var travel = claim1.TravelDetails; // Assuming 1:1 per claim
+
+                foreach (var c in travelDetailsDtos.CardCashEntries)
+                {
+                    travel.CardCashEntries.Add(new CashInfo
+                    {
+                        LoadedDate = c.LoadedDate,
+                        Type = c.Type,
+                        INRRate = c.INRRate,
+                        TotalLoaded = c.TotalLoaded,
+                        
+                    });
+                }
+
+                await _internationalTravelRepository.UpdateTravelDetails(travel);
+
+                // return updated DTO
+                return new TravelDetailsDtos
+                {
+                    TravelID = travel.TravelID,
+                    CurrencyType = travel.CurrecncyType,
+                    TravelStartDate = travel.TravelStartDate,
+                    TravelEndDate = travel.TravelEndDate,
+                    TotalDays = travel.TotalDays,
+                    RecentClaimId = travel.RecentClaimId,
+                    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
+                    {
+                        LoadedDate = c.LoadedDate,
+                        Type = c.Type,
+                        INRRate = c.INRRate,
+                        TotalLoaded = c.TotalLoaded
+                    }).ToList()
+                };
+
 
             }
             //return  return _mapper.Map<TravelDetailsDtos>(created);

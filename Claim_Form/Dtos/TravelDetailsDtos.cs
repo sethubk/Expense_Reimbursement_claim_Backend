@@ -4,6 +4,7 @@ namespace Claim_Form.Dtos
 {
     public class TravelDetailsDtos
     {
+        public Guid TravelID { get; set; }
         public string CurrencyType { get; set; }
         public string TravelStartDate { get; set; }
         public string TravelEndDate { get; set; }
