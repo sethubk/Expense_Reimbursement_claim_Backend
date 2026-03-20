@@ -3,6 +3,7 @@ using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Claim_Form.Controllers
 {
@@ -17,13 +18,13 @@ namespace Claim_Form.Controllers
             _expenseService = expenseService;
         }
 
-        [HttpPost("Claim")]
-        public async Task<IActionResult> AddExpenseAsync(Guid claimid, ExpenseDto dto)
-        {
-            return Ok(await _expenseService.AddExpense(claimid, dto));
-        }
+        //[HttpPost("Claim")]
+        //public async Task<IActionResult> AddExpenseAsync(Guid claimid, ExpenseDto dto)
+        //{
+        //    return Ok(await _expenseService.AddExpense(claimid, dto));
+        //}
 
-        [HttpPost("create/{claimId:guid}")]
+        [HttpPost("{claimId:guid}")]
         public async Task<IActionResult> CreateExpense([FromRoute] Guid claimId, [FromBody] List<ExpenseEntryDto> entries)
         {
             if (entries == null || entries.Count == 0)
@@ -45,28 +46,128 @@ namespace Claim_Form.Controllers
                 return StatusCode(500, "Internal server error.");
             }
         }
-      
 
 
-        [HttpGet("id:Guid")]
-        public async Task<IActionResult> GetExpenseAsync(Guid id)
+        /// <summary>
+        /// Retrieves a specific expense by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier (GUID) of the expense to retrieve.</param>
+        /// <returns>
+        /// Returns the expense details if found; otherwise, an appropriate HTTP error response.
+        /// </returns>
+        [HttpGet("{id:guid}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Expense retrieved successfully.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "The provided expense id is invalid.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred.")]
+        public async Task<IActionResult> GetExpenseAsync([FromRoute] Guid id)
         {
-            return Ok(await _expenseService.GetExpenseAsync(id));
+            try
+            {
+                if (id == Guid.Empty)
+                    return BadRequest("Invalid expense id.");
+
+                var expense = await _expenseService.GetExpenseAsync(id);
+                if (expense is null)
+                    return NotFound($"No expense found with id '{id}'.");
+
+                return Ok(expense);
+            }
+            catch (Exception ex)
+            {
+                // Single catch as requested
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = "An unexpected error occurred.",
+                    Detail = "Please try again later.",
+                    Instance = HttpContext?.Request?.Path
+                });
+            }
         }
 
-        [HttpPut("id:Guid")]
-
-        public async Task<IActionResult> UpdateExpense(Guid id, ExpenseDto dto)
+        /// <summary>
+        /// Updates an existing expense with the provided details.
+        /// </summary>
+        /// <param name="id">The unique identifier (GUID) of the expense to update.</param>
+        /// <param name="dto">The expense data to apply to the existing record.</param>
+        /// <returns>
+        /// The updated expense details if the update succeeds; otherwise, an appropriate HTTP error response.
+        /// </returns>
+        [HttpPut("{id:guid}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Expense updated successfully.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "The request is invalid or the id is not valid.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred.")]
+        public async Task<IActionResult> UpdateExpense([FromRoute] Guid id, [FromBody] ExpenseDto dto)
         {
-            return Ok(await _expenseService.UpdateExpense(id, dto));
+            try
+            {
+                if (id == Guid.Empty)
+                    return BadRequest("Invalid expense id.");
+                if (dto is null)
+                    return BadRequest("Request body is required.");
+
+                var updated = await _expenseService.UpdateExpense(id, dto);
+                if (updated is null)
+                    return NotFound($"No expense found with id '{id}'.");
+
+                return Ok(updated);
+            }
+            catch (Exception)
+            {
+                // Single catch as requested
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = "An unexpected error occurred.",
+                    Detail = "Please try again later.",
+                    Instance = HttpContext?.Request?.Path
+                });
+            }
         }
 
-        [HttpDelete]
-
-        public async Task<IActionResult> DeleteExpense(Guid id)
+        /// <summary>
+        /// Deletes an expense by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier (GUID) of the expense to delete.</param>
+        /// <returns>
+        /// Returns 204 No Content if the expense was deleted; otherwise, an appropriate HTTP error response.
+        /// </returns>
+        [HttpDelete("{id:guid}")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Expense deleted successfully.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "The provided expense id is invalid.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred.")]
+        public async Task<IActionResult> DeleteExpense([FromRoute] Guid id)
         {
-            return Ok(await _expenseService.DeleteExpense(id));
+            try
+            {
+                if (id == Guid.Empty)
+                    return BadRequest("Invalid expense id.");
+
+                var deleted = await _expenseService.DeleteExpense(id);
+
+               
+                // If your service returns the deleted object
+                if (deleted is null)
+                    return NotFound($"No expense found with id '{id}'.");
+
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                // Single catch as requested
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = "An unexpected error occurred.",
+                    Detail = "Please try again later.",
+                    Instance = HttpContext?.Request?.Path
+                });
+            }
         }
+
 
     }
 }

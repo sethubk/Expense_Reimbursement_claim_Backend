@@ -2,6 +2,7 @@
 using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Claim_Form.Controllers
 {
@@ -17,10 +18,15 @@ namespace Claim_Form.Controllers
         }
 
 
-        /// <summary>
-        /// Creates a new TravelDetails record linked to a ClaimID
-        /// </summary>
-        [HttpPost("{claimId:guid}")]
+        //// <summary>
+        //// Creates a new TravelDetails record linked to a ClaimID
+        //// </summary>
+        //// <param name="claimId">cretae the travel details , like start and ens date od travel.</param>
+        [HttpPost("{claimId}")]
+        [SwaggerResponse(200, "Success")]
+        //[SwaggerResponse(400, "Bad Request")]
+        //[SwaggerResponse(404, "Not Found")]
+        //[SwaggerResponse(500, "Internal Server Error")]
         public async Task<IActionResult> AddTravelDetails(Guid claimId,[FromBody] TravelDetailsDtos travelDetailsDtos)
         {
 
@@ -42,7 +48,15 @@ namespace Claim_Form.Controllers
         }
 
 
-        [HttpGet("{claimId:guid}")]
+        //// <summary>
+        //// get travel details TravelDetails record linked to a ClaimID
+        //// </summary>
+        //// <param name="claimId" get the travel details , like start and ens date od travel.</param>
+        [HttpGet("{claimId}")]
+        [SwaggerResponse(200, "Success")]
+        [SwaggerResponse(400, "Bad Request")]
+        [SwaggerResponse(404, "Not Found")]
+        [SwaggerResponse(500, "Internal Server Error")]
         public async Task<IActionResult> GetTravelByClaimId(Guid claimId)
         {
             var result = await _internationalTravelService.GetTravelByClaimId(claimId);

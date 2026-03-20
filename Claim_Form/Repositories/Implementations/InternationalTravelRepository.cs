@@ -2,7 +2,6 @@
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Writers;
 
 namespace Claim_Form.Repositories.Implementations
 {

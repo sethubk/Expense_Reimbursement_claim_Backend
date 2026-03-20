@@ -1,5 +1,4 @@
 using Claim_Form.Data;
-using Claim_Form.Mapping;
 using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Implementations;
@@ -9,26 +8,31 @@ using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ----------------------
+// SERVICE REGISTRATIONS
+// ----------------------
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-          options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IEmployeeRepository,EmployeeRepository>();
-builder.Services.AddScoped<IEmployeeService,EmployeeService>();
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IRecentClaimService, RecentClaimService>();
 builder.Services.AddScoped<IRecentClaimRepository, RecentClaimRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IInternationalTravelRepository, InternationalTravelRepository>();
 builder.Services.AddScoped<IInternationalTravelService, InternationalTravelService>();
+
 builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -39,6 +43,8 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+
+// Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
    .AddJwtBearer(options =>
    {
@@ -55,21 +61,43 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        };
    });
 
-
 builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
                 .AddNegotiate();
+
+// ----------------------
+// SWAGGER MUST BE HERE!
+// ----------------------
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Claim Form API",
+        Version = "v1",
+        Description = "API for employee claims with JWT authentication"
+    });
+
+    c.EnableAnnotations();
+});
+
+// ----------------------
+// BUILD APP (AFTER ALL SERVICES)
+// ----------------------
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+// ----------------------
+// MIDDLEWARE PIPELINE
+// ----------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
-app.UseAuthorization();
 app.UseAuthorization();
 
 app.MapControllers();

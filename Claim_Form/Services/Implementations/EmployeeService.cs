@@ -21,7 +21,6 @@ namespace Claim_Form.Services.Implementations
             _authRepository = authRepository;
 
         }
-
         public async Task<EmployeeResponseDtos> GetEmployeeAsync(EmployeeLoginDtos dto)
         {
             var Employee = await _authRepository.GetEmployeeAsync(dto.Email);
@@ -58,24 +57,22 @@ namespace Claim_Form.Services.Implementations
         }
         private string GenerateJwtToken(Employee employee)
         {
-
             //var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-
 
             var key = new SymmetricSecurityKey(
           Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
       );
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.Name, employee.Name),
-    new Claim("EmpCode", employee.EmpCode),
-    new Claim("Department", employee.Department ?? ""),
-    new Claim(ClaimTypes.Role, employee.Role ?? ""),
-    new Claim(ClaimTypes.Email, employee.Email ?? ""),
-    new Claim("VenderCost", employee.VenderCost ?? ""),
-    new Claim("CostCenter", employee.CostCenter ?? "")
-};
+                {
+                    new Claim(ClaimTypes.Name, employee.Name),
+                    new Claim("EmpCode", employee.EmpCode),
+                    new Claim("Department", employee.Department ?? ""),
+                    new Claim(ClaimTypes.Role, employee.Role ?? ""),
+                    new Claim(ClaimTypes.Email, employee.Email ?? ""),
+                    new Claim("VenderCost", employee.VenderCost ?? ""),
+                    new Claim("CostCenter", employee.CostCenter ?? "")
+                };
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
