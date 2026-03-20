@@ -29,7 +29,7 @@ namespace Claim_Form.Services.Implementations
             {
                 throw new ArgumentNullException(nameof(claim1));
             }
-            if (claim1.TravelDetails == null )
+            if (claim1.TravelDetails is null )
             {
                 //var travel = _mapper.Map<TravelDetails>(travelDetailsDtos);
                 //travel.RecentClaimId = ClaimID;
@@ -41,8 +41,9 @@ namespace Claim_Form.Services.Implementations
                     TravelStartDate = travelDetailsDtos.TravelStartDate,
                     TravelEndDate = travelDetailsDtos.TravelEndDate,
                     TotalDays = travelDetailsDtos.TotalDays,
+                    AdvanceAmount = travelDetailsDtos.AdvanceAmount,
                     RecentClaimId = claim1.RecentClaimId,
-
+                   
                     CardCashEntries = travelDetailsDtos.CardCashEntries.Select(c => new CashInfo
                         {
                             LoadedDate=c.TotalLoaded,
@@ -57,12 +58,13 @@ namespace Claim_Form.Services.Implementations
 
                 return new TravelDetailsDtos
                 {
-                    TravelID = travel.TravelID,
+                    
                     CurrencyType = travel.CurrecncyType,  // spelling fix
                     TravelStartDate = travel.TravelStartDate,
                     TravelEndDate = travel.TravelEndDate,
                     TotalDays = travel.TotalDays,
-                    RecentClaimId = travel.RecentClaimId,
+                    AdvanceAmount= travel.AdvanceAmount,
+                  
 
                     CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
                     {
@@ -79,7 +81,7 @@ namespace Claim_Form.Services.Implementations
             {
 
                 var travel = claim1.TravelDetails; // Assuming 1:1 per claim
-
+              
                 foreach (var c in travelDetailsDtos.CardCashEntries)
                 {
                     travel.CardCashEntries.Add(new CashInfo
@@ -91,18 +93,17 @@ namespace Claim_Form.Services.Implementations
                         
                     });
                 }
-
+                travel.AdvanceAmount = travelDetailsDtos.AdvanceAmount;
                 await _internationalTravelRepository.UpdateTravelDetails(travel);
 
                 // return updated DTO
                 return new TravelDetailsDtos
                 {
-                    TravelID = travel.TravelID,
+                    
                     CurrencyType = travel.CurrecncyType,
                     TravelStartDate = travel.TravelStartDate,
                     TravelEndDate = travel.TravelEndDate,
                     TotalDays = travel.TotalDays,
-                    RecentClaimId = travel.RecentClaimId,
                     CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
                     {
                         LoadedDate = c.LoadedDate,
@@ -112,10 +113,8 @@ namespace Claim_Form.Services.Implementations
                     }).ToList()
                 };
 
-
             }
             //return  return _mapper.Map<TravelDetailsDtos>(created);
-
 
         }
         public async Task<TravelDetailsDtos?> GetTravelByClaimId(Guid claimId)
@@ -128,13 +127,12 @@ namespace Claim_Form.Services.Implementations
             // MANUAL MAPPING (clean & complete)
             return new TravelDetailsDtos
             {
-                TravelID = travel.TravelID,
+                
                 CurrencyType = travel.CurrecncyType,
                 TravelStartDate = travel.TravelStartDate,
                 TravelEndDate = travel.TravelEndDate,
                 TotalDays = travel.TotalDays,
-                RecentClaimId = travel.RecentClaimId,
-
+                AdvanceAmount=travel.AdvanceAmount,
                 CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
                 {
                     LoadedDate = c.LoadedDate,

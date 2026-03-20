@@ -39,7 +39,7 @@ namespace Claim_Form.Data
             modelBuilder.Entity<TravelDetails>()
                     .HasMany(td => td.CardCashEntries)
                     .WithOne(ci => ci.TravelDetails)
-                    .HasForeignKey(ci => ci.id);
+                    .HasForeignKey(ci => ci.TravelDetails.TravelID);
 
 
         }

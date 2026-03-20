@@ -11,6 +11,7 @@ namespace Claim_Form.Entities
         public string TravelStartDate { get; set; }
         public string TravelEndDate { get; set; }
         public string TotalDays { get; set; }
+        public string AdvanceAmount { get; set; }
         public Guid RecentClaimId { get; set; }
         public RecentClaim RecentClaim { get; set; }
 

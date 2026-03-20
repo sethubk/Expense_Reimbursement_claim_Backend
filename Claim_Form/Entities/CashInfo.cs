@@ -10,7 +10,7 @@ namespace Claim_Form.Entities
         public string Type { get; set; }
         public string  INRRate { get; set; }
         public string TotalLoaded {  get; set; }
-
+       
         public TravelDetails TravelDetails { get; set; }
 
     }
