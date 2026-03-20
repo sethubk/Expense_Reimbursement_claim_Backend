@@ -1,9 +1,7 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Services.Interface;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-
 namespace Claim_Form.Controllers
 {
     [Route("api/[controller]")]
@@ -16,8 +14,6 @@ namespace Claim_Form.Controllers
         {
             _recentClaimService = recentClaimService;
         }
-
-
 
         /// <summary>
         /// get the Claim using the claimID id=claimid
@@ -55,7 +51,7 @@ namespace Claim_Form.Controllers
 
         }
         /// <summary>
-        /// create a Claim using the claimID
+        /// create a Claim using the Empcode
         /// </summary>
         /// <param name="Empcode">Create the Claim using the Empcode , this empcode is used to find the Employee</param>
         /// <returns>Created Claims.</returns>
@@ -216,7 +212,5 @@ namespace Claim_Form.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }
         }
-
-
     }
 }

@@ -2,9 +2,6 @@
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
-using static Claim_Form.Repositories.Implementations.RecentClaimRepository;
-
 namespace Claim_Form.Repositories.Implementations
 {
 
@@ -21,14 +18,12 @@ namespace Claim_Form.Repositories.Implementations
             _context.RecentClaims.Add(claim);
             await _context.SaveChangesAsync();
             return claim;
-
         }
         public async Task UpdateClaim(RecentClaim claim)
         {
             _context.RecentClaims.Update(claim);
             await _context.SaveChangesAsync();
         }
-
         public async Task<RecentClaim> GetClaim(Guid id)
         {
             var claim = await _context.RecentClaims.FirstOrDefaultAsync(e => e.RecentClaimId == id);
@@ -38,8 +33,6 @@ namespace Claim_Form.Repositories.Implementations
             }
             return claim;
         }
-       
-
         public async Task<RecentClaim?> GetClaimByEmpIdAsync(Guid empId)
         {
             return await _context.RecentClaims
@@ -57,7 +50,6 @@ namespace Claim_Form.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
-       
     }
 }
 

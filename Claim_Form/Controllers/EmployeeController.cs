@@ -1,12 +1,8 @@
 ﻿using Claim_Form.Data;
 using Claim_Form.Dtos;
-using Claim_Form.Entities;
 using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Reflection.Emit;
-
-
 
 namespace Claim_Form.Controllers
 {
@@ -23,9 +19,8 @@ namespace Claim_Form.Controllers
             _context = context;
         }
 
-
         /// <summary>
-        /// Logs an employee in using email and password and returns a JWT access token.
+        /// Logs an employee using an email and password.
         /// </summary>
         /// <param name="dto">Login payload containing EmpEmail and Password.</param>
         /// <returns>JWT token and basic user information on success.</returns>
@@ -89,19 +84,19 @@ namespace Claim_Form.Controllers
         //}
 
 
-        ///// <summary>
-        ///// Get the Employee Details using from Empcode.
-        ///// </summary>
-        ///// <param name="EmpCode">Login payload containing EmpEmail and Password.</param>
-        ///// <returns>JWT token and basic user information on success.</returns>
-        ///// <remarks>
-        ///// On success returns a short-lived JWT access token. Consider using HTTPS and secure storage.
-        ///// </remarks>
+        /// <summary>
+        /// Get the Employee Details using Empcode.
+        /// </summary>
+        /// <param name="EmpCode">Login payload containing EmpEmail and Password.</param>
+        /// <returns>JWT token and basic user information on success.</returns>
+        /// <remarks>
+        /// On success returns a short-lived JWT access token. Consider using HTTPS and secure storage.
+        /// </remarks>
         [HttpGet("{EmpCode}")]
         [SwaggerResponse(200, "Success")]
-        //[SwaggerResponse(400, "Bad Request")]
-        //[SwaggerResponse(404, "Not Found")]
-        //[SwaggerResponse(500, "Internal Server Error")]
+        [SwaggerResponse(400, "Bad Request")]
+        [SwaggerResponse(404, "Not Found")]
+        [SwaggerResponse(500, "Internal Server Error")]
         public async Task<IActionResult> GetEmployeeClaims(string EmpCode)
         {
 

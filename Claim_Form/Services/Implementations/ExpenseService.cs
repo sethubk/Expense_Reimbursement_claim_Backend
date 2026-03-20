@@ -1,14 +1,9 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Entities;
-using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-
 namespace Claim_Form.Services.Implementations
-{
-    
+{ 
         public class ExpenseService : IExpenseService
         {
 
@@ -91,9 +86,6 @@ namespace Claim_Form.Services.Implementations
 
             }).ToList();
         }
-        
-       
-
             public async Task<ExpenseDto?> GetExpenseAsync(Guid id)
             {
                 try

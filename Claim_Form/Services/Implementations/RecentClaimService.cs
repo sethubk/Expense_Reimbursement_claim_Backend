@@ -1,11 +1,7 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Entities;
-using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
-using System;
-using System.Security.Claims;
-
 namespace Claim_Form.Services.Implementations
 {
     public class RecentClaimService : IRecentClaimService
@@ -17,7 +13,6 @@ namespace Claim_Form.Services.Implementations
             _recentRepository = recentRepository;
             _employeeRepository = employeeRepository;
         }
-
         public async Task<RecentClaimResponseDto> CreateClaimAsync(RecentClaimDto dto, string EmpCode)
         {
             var emp = await _employeeRepository.GetEmployee(EmpCode);
@@ -52,9 +47,6 @@ namespace Claim_Form.Services.Implementations
                 throw new InvalidOperationException($"Employee with code '{EmpCode}' not found.");
             }
 
-
-
-            
         }
         public async Task<RecentClaimDto> UpdateClaimAsync(UpdateClaimDto dto, string EmpCode, Guid id)
         {

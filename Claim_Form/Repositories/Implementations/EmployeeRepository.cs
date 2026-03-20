@@ -13,7 +13,6 @@ namespace Claim_Form.Repositories.Implementations
         {
             _context=context;
         }
-
         public async Task<Employee?> GetEmployeeAsync(string email)
         {
             return await _context.Employees.FirstOrDefaultAsync(e=>e.Email==email);

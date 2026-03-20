@@ -1,8 +1,6 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Services.Interface;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Claim_Form.Controllers
@@ -33,13 +31,13 @@ namespace Claim_Form.Controllers
             try
             {
                 var result = await _expenseService.CreateBulkAsync(claimId, entries);
-                return Ok(result); // return inserted rows or a summary
-            }
-            catch (InvalidOperationException ex)
-            {
 
-                return NotFound(ex.Message);
-            }
+                if (result is null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);  
+            } 
             catch (Exception ex)
             {
 

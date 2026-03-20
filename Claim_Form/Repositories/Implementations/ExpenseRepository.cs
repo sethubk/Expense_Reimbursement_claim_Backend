@@ -13,7 +13,6 @@ namespace Claim_Form.Repositories.Implementations
         {
             _context = context;
         }
-
         public async Task AddExpense(Expense expense)
         {
             _context.Expenses.Add(expense);

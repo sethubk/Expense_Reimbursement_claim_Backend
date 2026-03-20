@@ -22,7 +22,6 @@ namespace Claim_Form.Services.Implementations
             _mapper = mapper;
             _RecentRepository = recentClaimRepository;
         }
-
         public async Task<TravelDetailsDtos>AddTravelDetails( Guid ClaimID, TravelDetailsDtos travelDetailsDtos)
         {
             var claim1 = await _RecentRepository.GetClaim(ClaimID);
@@ -119,8 +118,6 @@ namespace Claim_Form.Services.Implementations
 
 
         }
-
-
         public async Task<TravelDetailsDtos?> GetTravelByClaimId(Guid claimId)
         {
             var travel = await _internationalTravelRepository.GetTravelByClaimId(claimId);

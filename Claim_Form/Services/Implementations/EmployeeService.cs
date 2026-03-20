@@ -2,7 +2,6 @@
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -30,17 +29,11 @@ namespace Claim_Form.Services.Implementations
                 throw new Exception("invalid Employeee code");
             }
 
-
-
-
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, Employee.passwordHash))
             {
                 throw new Exception("invalid password");
             }
             var token = GenerateJwtToken(Employee);
-
-
-
 
             return new EmployeeResponseDtos
             {
