@@ -119,5 +119,34 @@ namespace Claim_Form.Services.Implementations
 
 
         }
+
+
+        public async Task<TravelDetailsDtos?> GetTravelByClaimId(Guid claimId)
+        {
+            var travel = await _internationalTravelRepository.GetTravelByClaimId(claimId);
+
+            if (travel == null)
+                return null;
+
+            // MANUAL MAPPING (clean & complete)
+            return new TravelDetailsDtos
+            {
+                TravelID = travel.TravelID,
+                CurrencyType = travel.CurrecncyType,
+                TravelStartDate = travel.TravelStartDate,
+                TravelEndDate = travel.TravelEndDate,
+                TotalDays = travel.TotalDays,
+                RecentClaimId = travel.RecentClaimId,
+
+                CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
+                {
+                    LoadedDate = c.LoadedDate,
+                    Type = c.Type,
+                    INRRate = c.INRRate,
+                    TotalLoaded = c.TotalLoaded
+                }).ToList()
+            };
+        }
+
     }
 }

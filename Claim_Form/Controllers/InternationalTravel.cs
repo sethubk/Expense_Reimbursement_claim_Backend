@@ -41,5 +41,20 @@ namespace Claim_Form.Controllers
 
         }
 
+
+        [HttpGet("{claimId:guid}")]
+        public async Task<IActionResult> GetTravelByClaimId(Guid claimId)
+        {
+            var result = await _internationalTravelService.GetTravelByClaimId(claimId);
+
+            if (result == null)
+            {
+                return NotFound(new { message = "No travel details found for this claim." });
+            }
+
+            return Ok(result);
+        }
+
+
     }
 }
