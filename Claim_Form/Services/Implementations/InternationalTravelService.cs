@@ -29,7 +29,8 @@ namespace Claim_Form.Services.Implementations
             {
                 throw new ArgumentNullException(nameof(claim1));
             }
-            if (claim1.TravelDetails is null )
+            var travel1= await _internationalTravelRepository.GetTravel(ClaimID);
+            if (travel1 == null)
             {
                 //var travel = _mapper.Map<TravelDetails>(travelDetailsDtos);
                 //travel.RecentClaimId = ClaimID;
@@ -90,7 +91,8 @@ namespace Claim_Form.Services.Implementations
                         Type = c.Type,
                         INRRate = c.INRRate,
                         TotalLoaded = c.TotalLoaded,
-                        
+                        TravelId = travel.TravelID
+
                     });
                 }
                 travel.AdvanceAmount = travelDetailsDtos.AdvanceAmount;

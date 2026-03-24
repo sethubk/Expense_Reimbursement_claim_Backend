@@ -45,5 +45,10 @@ namespace Claim_Form.Repositories.Implementations
                 .FirstOrDefaultAsync(t => t.RecentClaimId == claimId);
         }
 
+        public async Task<TravelDetails> GetTravel(Guid travel)
+        {
+            return await _context.TravelDetails.FirstOrDefaultAsync(t=>t.RecentClaimId==travel);
+        }
+
     }
 }

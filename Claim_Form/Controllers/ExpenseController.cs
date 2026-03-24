@@ -22,6 +22,19 @@ namespace Claim_Form.Controllers
         //    return Ok(await _expenseService.AddExpense(claimid, dto));
         //}
 
+        /// <summary>
+        /// Retrieves a specific expense by its unique identifier.
+        /// </summary>
+        /// <param name="claimId">The unique identifier (GUID) of the expense to retrieve.</param>
+        /// <param name="ExpenseEntryDto">The unique identifier (GUID) of the expense to retrieve.</param>
+        /// <returns>
+        /// Returns the expense details if found; otherwise, an appropriate HTTP error response.
+        /// </returns>
+
+        [SwaggerResponse(StatusCodes.Status200OK)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "The provided expense id is invalid.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred.")]
         [HttpPost("{claimId:guid}")]
         public async Task<IActionResult> CreateExpense([FromRoute] Guid claimId, [FromBody] List<ExpenseEntryDto> entries)
         {
