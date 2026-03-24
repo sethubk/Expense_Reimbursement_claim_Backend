@@ -13,5 +13,6 @@
 
         public ICollection<Expense> Expenses { get; set; }
         public TravelDetails TravelDetails { get; set; }
+        public ICollection<International> Internationals { get; set; }
     }
 }

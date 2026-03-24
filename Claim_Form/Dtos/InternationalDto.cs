@@ -1,11 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Claim_Form.Entities
+﻿namespace Claim_Form.Dtos
 {
-    public class International
+    public class InternationalDto
     {
-        [Key]
-        public Guid InternationalId {  get; set; }
         public DateTime Date { get; set; }
         public string SupportingNo { get; set; }
         public string Particulars { get; set; }
@@ -15,8 +11,5 @@ namespace Claim_Form.Entities
         public decimal ConvertedAmount { get; set; }
         public string Remarks { get; set; }
         public string Screenshot { get; set; }
-
-        public Guid RecentClaimId { get; set; }
-        public RecentClaim RecentClaim { get; set; }
     }
 }

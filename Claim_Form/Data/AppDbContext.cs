@@ -17,6 +17,8 @@ namespace Claim_Form.Data
         public DbSet<RecentClaim> RecentClaims { get; set; }
 
         public DbSet<TravelDetails> TravelDetails { get; set; }
+
+        public DbSet<International>Internationals { get; set; }
         public DbSet<CashInfo> CashInfo { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +42,13 @@ namespace Claim_Form.Data
                     .HasMany(td => td.CardCashEntries)
                     .WithOne(ci => ci.TravelDetails)
                     .HasForeignKey(ci => ci.TravelId);
+
+
+            modelBuilder.Entity<RecentClaim>()
+                .HasMany(rc => rc.Internationals)
+                .WithOne(ie => ie.RecentClaim)
+                .HasForeignKey(ie => ie.RecentClaimId);
+
 
 
         }
