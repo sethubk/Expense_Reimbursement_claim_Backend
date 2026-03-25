@@ -12,11 +12,14 @@ namespace Claim_Form.Entities
         public string TravelEndDate { get; set; }
         public string TotalDays { get; set; }
         public string AdvanceAmount { get; set; }
+
+        public string ReimbersementStatus { get; set; }
         public Guid RecentClaimId { get; set; }
         public RecentClaim RecentClaim { get; set; }
 
         
         public ICollection<CashInfo> CardCashEntries { get; set; } = new List<CashInfo>();
+        public ICollection<International> Internationals { get; set; }
 
     }
 }

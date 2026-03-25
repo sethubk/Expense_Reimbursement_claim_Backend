@@ -16,7 +16,7 @@ namespace Claim_Form.Entities
         public string Remarks { get; set; }
         public string Screenshot { get; set; }
 
-        public Guid RecentClaimId { get; set; }
-        public RecentClaim RecentClaim { get; set; }
+        public Guid TravelId { get; set; }
+        public TravelDetails TravelDetails { get; set; }
     }
 }

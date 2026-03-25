@@ -44,10 +44,10 @@ namespace Claim_Form.Data
                     .HasForeignKey(ci => ci.TravelId);
 
 
-            modelBuilder.Entity<RecentClaim>()
+            modelBuilder.Entity<TravelDetails>()
                 .HasMany(rc => rc.Internationals)
-                .WithOne(ie => ie.RecentClaim)
-                .HasForeignKey(ie => ie.RecentClaimId);
+                .WithOne(ie => ie.TravelDetails)
+                .HasForeignKey(ie => ie.TravelId);
 
 
 

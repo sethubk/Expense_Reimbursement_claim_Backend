@@ -30,7 +30,7 @@ namespace Claim_Form.Services.Implementations
             {
 
 
-                RecentClaimId = claimId,
+                TravelId = claim.TravelDetails.TravelID,
                 Date = e.Date,
                 SupportingNo = e.SupportingNo,
                 Particulars = e.Particulars,
@@ -63,6 +63,8 @@ namespace Claim_Form.Services.Implementations
 
 
             }).ToList();
+
+            
         }
 
         public async Task<InternationalDto?> GetInternationalAsync(Guid id)
