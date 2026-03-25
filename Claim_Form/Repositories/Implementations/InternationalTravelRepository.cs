@@ -34,6 +34,20 @@ namespace Claim_Form.Repositories.Implementations
             return travel;
         }
 
+        public async Task<TravelDetails> UpdateReimbersementStatus(Guid travelId, string status)
+        {
+
+            var travelDetails = new TravelDetails
+            {
+                TravelID = travelId,
+                ReimbersementStatus = status
+            };
+
+            _context.TravelDetails.Update(travelDetails);
+            await _context.SaveChangesAsync();
+            return travelDetails;
+        }
+
         // ------------------------------
         // GET TravelDetails FOR A CLAIM
         // INCLUDING CASH ENTRIES

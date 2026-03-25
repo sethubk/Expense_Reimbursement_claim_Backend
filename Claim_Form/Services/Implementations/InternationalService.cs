@@ -11,12 +11,15 @@ namespace Claim_Form.Services.Implementations
 
         private readonly IRecentClaimRepository _RecentRepository;
         private readonly IInternationalRepository _internationalRepository;
+        private readonly IInternationalTravelRepository _internationalTravelRepository;
         private readonly ILogger<ExpenseService> _logger;
-        public InternationalService(IInternationalRepository internationalRepository ,IRecentClaimRepository recentClaimRepository,ILogger<InternationalService> logger)
+        public InternationalService(IInternationalRepository internationalRepository ,IRecentClaimRepository recentClaimRepository,ILogger<InternationalService> logger, IInternationalTravelRepository internationalTravelRepository)
         {
             _internationalRepository = internationalRepository;
             _RecentRepository = recentClaimRepository;
             _logger = (ILogger<ExpenseService>?)logger;
+            _internationalTravelRepository=internationalTravelRepository;
+
 
         }
         
@@ -45,6 +48,25 @@ namespace Claim_Form.Services.Implementations
             }).ToList();
 
             await _internationalRepository.CreateBulkAsync(models);
+            // Calculate total expense
+            decimal totalExpense = 0;
+            foreach (var item in models)
+            {
+                totalExpense += item.Amount;
+            }
+
+            // Convert advance amount
+            decimal advanceAmount = 0;
+            decimal.TryParse(claim.TravelDetails.AdvanceAmount, out advanceAmount);
+
+            // Compute reimbursement status
+            decimal reimbursementStatus = totalExpense - advanceAmount;
+
+            // Save it
+            var ReimbersementStatus = reimbursementStatus.ToString();
+
+            // Update DB
+            await _internationalTravelRepository.UpdateReimbersementStatus(claim.TravelDetails.TravelID, ReimbersementStatus);
             return models.Select(e => new InternationalDto
             {
 

@@ -9,5 +9,6 @@ namespace Claim_Form.Repositories.Interface
         Task<TravelDetails> UpdateTravelDetails(TravelDetails travel);
         Task<TravelDetails?> GetTravelByClaimId(Guid claimId);
         Task<TravelDetails> GetTravel(Guid travel);
+        Task<TravelDetails> UpdateReimbersementStatus(Guid travelId, string status);
     }
 }
