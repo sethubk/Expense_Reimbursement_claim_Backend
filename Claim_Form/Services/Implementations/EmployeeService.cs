@@ -26,7 +26,7 @@ namespace Claim_Form.Services.Implementations
             if (Employee == null)
             {
 
-                throw new Exception("invalid Employeee code");
+                throw new Exception("invalid Employeee Email");
             }
 
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, Employee.passwordHash))
