@@ -30,6 +30,7 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IInternationalTravelRepository, InternationalTravelRepository>();
 builder.Services.AddScoped<IInternationalTravelService, InternationalTravelService>();
+builder.Services.AddScoped<IMailService, MailService>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
