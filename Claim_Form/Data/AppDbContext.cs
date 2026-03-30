@@ -47,7 +47,7 @@ namespace Claim_Form.Data
             modelBuilder.Entity<TravelDetails>()
                 .HasMany(rc => rc.Internationals)
                 .WithOne(ie => ie.TravelDetails)
-                .HasForeignKey(ie => ie.TravelId);
+                .HasForeignKey(ie => ie.TravelId); 
 
 
 
