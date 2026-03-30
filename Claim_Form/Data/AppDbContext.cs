@@ -49,7 +49,7 @@ namespace Claim_Form.Data
                 .WithOne(ie => ie.TravelDetails)
                 .HasForeignKey(ie => ie.TravelId); 
 
-
+             
 
         }
     }
