@@ -37,11 +37,15 @@ namespace Claim_Form.Repositories.Implementations
         public async Task<TravelDetails> UpdateReimbersementStatus(Guid travelId, string status)
         {
 
-            var travelDetails = new TravelDetails
-            {
-                TravelID = travelId,
-                ReimbersementStatus = status
-            };
+            var travelDetails = await _context.TravelDetails
+                    .FirstOrDefaultAsync(t => t.TravelID == travelId);
+
+            if (travelDetails == null)
+                throw new InvalidOperationException("TravelDetails not found");
+
+            travelDetails.ReimbersementStatus = status;
+
+            
 
             _context.TravelDetails.Update(travelDetails);
             await _context.SaveChangesAsync();

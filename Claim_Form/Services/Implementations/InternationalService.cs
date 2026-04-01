@@ -12,13 +12,13 @@ namespace Claim_Form.Services.Implementations
         private readonly IRecentClaimRepository _RecentRepository;
         private readonly IInternationalRepository _internationalRepository;
         private readonly IInternationalTravelRepository _internationalTravelRepository;
-        private readonly ILogger<ExpenseService> _logger;
-        public InternationalService(IInternationalRepository internationalRepository ,IRecentClaimRepository recentClaimRepository,ILogger<InternationalService> logger, IInternationalTravelRepository internationalTravelRepository)
+        private readonly ILogger<InternationalService> _logger;
+        public InternationalService(IInternationalRepository internationalRepository ,IRecentClaimRepository recentClaimRepository, ILogger<InternationalService> logger, IInternationalTravelRepository internationalTravelRepository)
         {
             _internationalRepository = internationalRepository;
             _RecentRepository = recentClaimRepository;
-            _logger = (ILogger<ExpenseService>?)logger;
-            _internationalTravelRepository=internationalTravelRepository;
+            _logger = (ILogger<InternationalService>?)logger;
+            _internationalTravelRepository =internationalTravelRepository;
 
 
         }
@@ -59,14 +59,31 @@ namespace Claim_Form.Services.Implementations
             decimal advanceAmount = 0;
             decimal.TryParse(claim.TravelDetails.AdvanceAmount, out advanceAmount);
 
+            //// Compute reimbursement status
+            //decimal reimbursementStatus = totalExpense - advanceAmount;
+
+            //// Save it
+            //var ReimbersementStatus = reimbursementStatus.ToString();
             // Compute reimbursement status
             decimal reimbursementStatus = totalExpense - advanceAmount;
-
-            // Save it
             var ReimbersementStatus = reimbursementStatus.ToString();
+            string reimbursementText;
+
+            if (reimbursementStatus > 0)
+            {
+                reimbursementText = $"Amount Payable to Employee: ₹{Math.Abs(reimbursementStatus)}";
+            }
+            else if (reimbursementStatus < 0)
+            {
+                reimbursementText = $"Amount Recover from Employee: ₹{Math.Abs(reimbursementStatus)}";
+            }
+            else
+            {
+                reimbursementText = "None";
+            }
 
             // Update DB
-            await _internationalTravelRepository.UpdateReimbersementStatus(claim.TravelDetails.TravelID, ReimbersementStatus);
+            await _internationalTravelRepository.UpdateReimbersementStatus(claim.TravelDetails.TravelID, reimbursementText);
             return models.Select(e => new InternationalDto
             {
 

@@ -44,10 +44,10 @@ namespace Claim_Form.Services.Implementations
                     TotalDays = travelDetailsDtos.TotalDays,
                     AdvanceAmount = travelDetailsDtos.AdvanceAmount,
                     RecentClaimId = claim1.RecentClaimId,
-                   
+                    ReimbersementStatus = "Pending",
                     CardCashEntries = travelDetailsDtos.CardCashEntries.Select(c => new CashInfo
                         {
-                            LoadedDate=c.TotalLoaded,
+                            LoadedDate=c.LoadedDate,
                             Type = c.Type,
                             INRRate = c.INRRate,
                             TotalLoaded = c.TotalLoaded,

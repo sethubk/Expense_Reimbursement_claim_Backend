@@ -24,14 +24,11 @@ namespace Claim_Form.Repositories.Implementations
             _context.RecentClaims.Update(claim);
             await _context.SaveChangesAsync();
         }
-        public async Task<RecentClaim> GetClaim(Guid id)
+        public async Task<RecentClaim?> GetClaim(Guid claimId)
         {
-            var claim = await _context.RecentClaims.FirstOrDefaultAsync(e => e.RecentClaimId == id);
-            if (claim == null)
-            {
-                return null;
-            }
-            return claim;
+            return await _context.RecentClaims
+                .Include(c => c.TravelDetails)   // ✅ REQUIRED
+                .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
         }
         public async Task<RecentClaim?> GetClaimByEmpIdAsync(Guid empId)
         {
