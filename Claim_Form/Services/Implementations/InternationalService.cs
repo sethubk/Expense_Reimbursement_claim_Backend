@@ -71,11 +71,12 @@ namespace Claim_Form.Services.Implementations
 
             if (reimbursementStatus > 0)
             {
-                reimbursementText = $"Amount Payable to Employee: ₹{Math.Abs(reimbursementStatus)}";
+                reimbursementText = $"Amount Recover from Employee: ₹{Math.Abs(reimbursementStatus)}";
+                
             }
             else if (reimbursementStatus < 0)
             {
-                reimbursementText = $"Amount Recover from Employee: ₹{Math.Abs(reimbursementStatus)}";
+                reimbursementText = $"Amount Payable to Employee: ₹{Math.Abs(reimbursementStatus)}";
             }
             else
             {

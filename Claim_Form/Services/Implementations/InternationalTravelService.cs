@@ -57,24 +57,25 @@ namespace Claim_Form.Services.Implementations
                await _internationalTravelRepository.AddTravelDetails(travel);
                 //return _mapper.Map<TravelDetailsDtos>(travel);
 
-                return new TravelDetailsDtos
-                {
+                //return new TravelDetailsDtos
+                //{
                     
-                    CurrencyType = travel.CurrecncyType,  // spelling fix
-                    TravelStartDate = travel.TravelStartDate,
-                    TravelEndDate = travel.TravelEndDate,
-                    TotalDays = travel.TotalDays,
-                    AdvanceAmount= travel.AdvanceAmount,
+                //    CurrencyType = travel.CurrecncyType,  // spelling fix
+                //    TravelStartDate = travel.TravelStartDate,
+                //    TravelEndDate = travel.TravelEndDate,
+                //    TotalDays = travel.TotalDays,
+                //    AdvanceAmount= travel.AdvanceAmount,
                   
 
-                    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
-                    {
-                        LoadedDate = c.TotalLoaded,
-                        Type = c.Type,
-                        INRRate = c.INRRate,
-                        TotalLoaded = c.TotalLoaded,
-                    }).ToList()
-                };
+                //    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
+                //    {
+                //        LoadedDate = c.TotalLoaded,
+                //        Type = c.Type,
+                //        INRRate = c.INRRate,
+                //        TotalLoaded = c.TotalLoaded,
+                //    }).ToList()
+                //};
+                return _mapper.Map<TravelDetailsDtos>(travel);
 
             }
 
