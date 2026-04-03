@@ -9,7 +9,7 @@ namespace Claim_Form.Repositories.Interface
         Task<RecentClaim> GetClaim(Guid id);
         Task<RecentClaim?> GetClaimByEmpIdAsync(Guid empId);
 
-        Task<RecentClaim?> GetClaimByEmpCode(string EmpCode);
+        Task<List<RecentClaim?>> GetClaimByEmpCode(string EmpCode);
         Task DeleteDraft(string EmpCode);
     }
 }

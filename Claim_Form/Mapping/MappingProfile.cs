@@ -9,7 +9,7 @@ namespace Claim_Form.Mapping
         public MappingProfile() {
             CreateMap<TravelDetails, TravelDetailsDtos>();
             CreateMap<TravelDetailsDtos, TravelDetails>();
-               
+            CreateMap<RecentClaim, RecentClaimResponseDto>();
         }
     }
 }

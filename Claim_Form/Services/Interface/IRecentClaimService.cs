@@ -8,7 +8,7 @@ namespace Claim_Form.Services.Interface
         Task<RecentClaimDto> UpdateClaimAsync(UpdateClaimDto dto, string EmpCode, Guid id);
         Task<RecentClaimDto> GetClaim(Guid id);
         Task<RecentClaimResponseDto?> GetClaimByEmpID(Guid id);
-        Task<RecentClaimResponseDto?> GetClaimByEmpCode(string Empcode);
+        Task<List<RecentClaimResponseDto>> GetClaimByEmpCode(string Empcode);
         Task<bool> DeleteDraft(string EmpCode);
 
     }

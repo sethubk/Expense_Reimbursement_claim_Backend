@@ -35,10 +35,11 @@ namespace Claim_Form.Repositories.Implementations
             return await _context.RecentClaims
                 .FirstOrDefaultAsync(c => c.EmpId == empId);
         }
-        public async Task<RecentClaim?> GetClaimByEmpCode(string EmpCode)
+        public async Task<List<RecentClaim>> GetClaimByEmpCode(string empCode)
         {
             return await _context.RecentClaims
-                .FirstOrDefaultAsync(c => c.Employee.EmpCode == EmpCode);
+                .Where(rc => rc.Employee.EmpCode == empCode)
+                .ToListAsync();
         }
         public async Task DeleteDraft(string EmpCode)
         {

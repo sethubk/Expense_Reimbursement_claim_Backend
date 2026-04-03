@@ -1,4 +1,5 @@
-﻿using Claim_Form.Dtos;
+﻿using AutoMapper;
+using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
@@ -8,10 +9,12 @@ namespace Claim_Form.Services.Implementations
     {
         private readonly IRecentClaimRepository _recentRepository;
         private readonly IEmployeeRepository _employeeRepository;
-        public RecentClaimService(IRecentClaimRepository recentRepository, IEmployeeRepository employeeRepository)
+        private readonly IMapper _mapper;
+        public RecentClaimService(IRecentClaimRepository recentRepository, IEmployeeRepository employeeRepository, IMapper mapper)
         {
             _recentRepository = recentRepository;
             _employeeRepository = employeeRepository;
+            _mapper = mapper;
         }
         public async Task<RecentClaimResponseDto> CreateClaimAsync(RecentClaimDto dto, string EmpCode)
         {
@@ -125,31 +128,26 @@ namespace Claim_Form.Services.Implementations
             }
 
         }
-        public async Task<RecentClaimResponseDto?> GetClaimByEmpCode(string Empcode)
+        public async Task<List<RecentClaimResponseDto>> GetClaimByEmpCode(string Empcode)
         {
             var emp = await _employeeRepository.GetEmployee(Empcode);
-            if (emp != null)
-            {
-                var claim = await _recentRepository.GetClaimByEmpCode(Empcode);
+            if (emp == null) return null;
 
-                return claim == null ? null : new RecentClaimResponseDto
-                {
-                    RecentClaimId = claim.RecentClaimId,
-                    Type = claim.Type,
-                    Date = claim.Date,
-                    Purpose = claim.Purpose,
-                    Status = claim.Status,
-                    Amount = claim.Amount,
+            var claim = await _recentRepository.GetClaimByEmpCode(Empcode);
+            if (claim == null) return null;
 
-                };
-            }
-            else
-            {
-                return null;
-            }
+            //return claim.Select(claim => new RecentClaimResponseDto
+            //{
+            //    RecentClaimId = claim.RecentClaimId,
+            //    Type = claim.Type,
+            //    Date = claim.Date,
+            //    Purpose = claim.Purpose,
+            //    Status = claim.Status,
+            //    Amount= claim.Amount
+            //}).ToList();
+            return _mapper.Map<List<RecentClaimResponseDto>>(claim);
 
         }
-
         public async Task<bool> DeleteDraft(string EmpCode)
         {
             var claim = _recentRepository.GetClaimByEmpCode(EmpCode);
