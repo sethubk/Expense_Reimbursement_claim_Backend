@@ -3,37 +3,47 @@ using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
 
-
 namespace Claim_Form.Services.Implementations
 {
-    public class InternationalService: IInternationalServices
+    /// <summary>
+    /// Service implementation for international expense operations.
+    /// </summary>
+    public class InternationalService : IInternationalServices
     {
-
-        private readonly IRecentClaimRepository _RecentRepository;
         private readonly IInternationalRepository _internationalRepository;
+        private readonly IRecentClaimRepository _recentClaimRepository;
         private readonly IInternationalTravelRepository _internationalTravelRepository;
-        private readonly ILogger<InternationalService> _logger;
-        public InternationalService(IInternationalRepository internationalRepository ,IRecentClaimRepository recentClaimRepository, ILogger<InternationalService> logger, IInternationalTravelRepository internationalTravelRepository)
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InternationalService"/> class.
+        /// </summary>
+        public InternationalService(
+            IInternationalRepository internationalRepository,
+            IRecentClaimRepository recentClaimRepository,
+            IInternationalTravelRepository internationalTravelRepository)
         {
             _internationalRepository = internationalRepository;
-            _RecentRepository = recentClaimRepository;
-            _logger = (ILogger<InternationalService>?)logger;
-            _internationalTravelRepository =internationalTravelRepository;
-
-
+            _recentClaimRepository = recentClaimRepository;
+            _internationalTravelRepository = internationalTravelRepository;
         }
-        
-        public async Task<IEnumerable<InternationalDto>> CreateBulkAsync(Guid claimId, List<InternationalDto> entries)
+
+        /// <summary>
+        /// Creates multiple international expenses for a given claim.
+        /// </summary>
+        public async Task<IEnumerable<InternationalDto>> CreateBulkAsync(
+            Guid claimId,
+            List<InternationalDto> entries)
         {
-            // (Optional) Validate the claim exists
-            var claim = await _RecentRepository.GetClaim(claimId);
-            if (claim == null) throw new InvalidOperationException("Claim not found.");
+            var claim = await _recentClaimRepository.GetByIdAsync(claimId);
 
-            var models = entries.Select(e => new International
+            if (claim == null || claim.TravelDetails == null)
+                throw new InvalidOperationException("Claim or travel details not found.");
+
+            var travel = claim.TravelDetails;
+
+            var expenses = entries.Select(e => new International
             {
-
-
-                TravelId = claim.TravelDetails.TravelID,
+                TravelId = travel.Id,
                 Date = e.Date,
                 SupportingNo = e.SupportingNo,
                 Particulars = e.Particulars,
@@ -43,52 +53,35 @@ namespace Claim_Form.Services.Implementations
                 ConvertedAmount = e.ConvertedAmount,
                 Remarks = e.Remarks,
                 Screenshot = e.Screenshot
-
-
             }).ToList();
 
-            await _internationalRepository.CreateBulkAsync(models);
-            // Calculate total expense
-            decimal totalExpense = 0;
-            foreach (var item in models)
+            await _internationalRepository.AddBulkAsync(expenses);
+
+            // 🔹 Calculate reimbursement
+            decimal totalExpense = expenses.Sum(e => e.ConvertedAmount);
+            decimal advanceAmount = travel.AdvanceAmount;
+
+            decimal difference = totalExpense - advanceAmount;
+            string reimbursementStatus;
+
+            if (difference > 0)
             {
-                totalExpense += item.Amount;
+                reimbursementStatus = $"Amount Payable to Employee: ₹{difference}";
             }
-
-            // Convert advance amount
-            decimal advanceAmount = 0;
-            decimal.TryParse(claim.TravelDetails.AdvanceAmount, out advanceAmount);
-
-            //// Compute reimbursement status
-            //decimal reimbursementStatus = totalExpense - advanceAmount;
-
-            //// Save it
-            //var ReimbersementStatus = reimbursementStatus.ToString();
-            // Compute reimbursement status
-            decimal reimbursementStatus = totalExpense - advanceAmount;
-            var ReimbersementStatus = reimbursementStatus.ToString();
-            string reimbursementText;
-
-            if (reimbursementStatus > 0)
+            else if (difference < 0)
             {
-                reimbursementText = $"Amount Recover from Employee: ₹{Math.Abs(reimbursementStatus)}";
-                
-            }
-            else if (reimbursementStatus < 0)
-            {
-                reimbursementText = $"Amount Payable to Employee: ₹{Math.Abs(reimbursementStatus)}";
+                reimbursementStatus = $"Amount Recover from Employee: ₹{Math.Abs(difference)}";
             }
             else
             {
-                reimbursementText = "None";
+                reimbursementStatus = "Settled";
             }
 
-            // Update DB
-            await _internationalTravelRepository.UpdateReimbersementStatus(claim.TravelDetails.TravelID, reimbursementText);
-            return models.Select(e => new InternationalDto
-            {
+            await _internationalTravelRepository
+                .UpdateReimbursementStatusAsync(travel.Id, reimbursementStatus);
 
-                
+            return expenses.Select(e => new InternationalDto
+            {
                 Date = e.Date,
                 SupportingNo = e.SupportingNo,
                 Particulars = e.Particulars,
@@ -98,87 +91,18 @@ namespace Claim_Form.Services.Implementations
                 ConvertedAmount = e.ConvertedAmount,
                 Remarks = e.Remarks,
                 Screenshot = e.Screenshot
-
-
-
-
-            }).ToList();
-
-            
+            });
         }
 
+        /// <summary>
+        /// Retrieves an international expense by its identifier.
+        /// </summary>
         public async Task<InternationalDto?> GetInternationalAsync(Guid id)
         {
-            try
-            {
-                var model = await _internationalRepository.GetInternationalExpenseById(id);
-                if (model == null) return null;
+            var model = await _internationalRepository.GetByIdAsync(id);
 
-                return new InternationalDto
-                {
-                    Date = model.Date,
-                    SupportingNo = model.SupportingNo,
-                    Particulars = model.Particulars,
-                    PaymentMode = model.PaymentMode,
-                    CurrencyType = model.CurrencyType,
-                    Amount = model.Amount,
-                    ConvertedAmount = model.ConvertedAmount,
-                    Remarks = model.Remarks,
-                    Screenshot = model.Screenshot
-                };
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Error retrieving international expense", ex);
-            }
-        }
-
-
-        public async Task<InternationalDto> UpdateInternationalAsync(Guid id, InternationalDto dto)
-        {
-            try
-            {
-                var model = await _internationalRepository.GetInternationalExpenseById(id);
-                if (model == null)
-                    throw new KeyNotFoundException("International expense not found");
-
-                model.Date = dto.Date;
-                model.SupportingNo = dto.SupportingNo;
-                model.Particulars = dto.Particulars;
-                model.PaymentMode = dto.PaymentMode;
-                model.CurrencyType = dto.CurrencyType;
-                model.Amount = dto.Amount;
-                model.ConvertedAmount = dto.ConvertedAmount;
-                model.Remarks = dto.Remarks;
-                model.Screenshot = dto.Screenshot;
-
-                await _internationalRepository.UpdateInternationalExpense(model);
-
-                return dto;
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating international expense");
-                throw new ApplicationException("Unable to update international expense", ex);
-            }
-        }
-
-
-        public async Task<InternationalDto?> DeleteInternationalAsync(Guid id)
-        {
-            var model = await _internationalRepository.GetInternationalExpenseById(id);
             if (model == null)
-            {
-                _logger.LogWarning("International expense not found");
                 return null;
-            }
-
-            await _internationalRepository.DeleteInternationalExpense(id);
 
             return new InternationalDto
             {
@@ -192,6 +116,47 @@ namespace Claim_Form.Services.Implementations
                 Remarks = model.Remarks,
                 Screenshot = model.Screenshot
             };
+        }
+
+        /// <summary>
+        /// Updates an existing international expense.
+        /// </summary>
+        public async Task<InternationalDto?> UpdateInternationalAsync(
+            Guid id,
+            InternationalDto dto)
+        {
+            var model = await _internationalRepository.GetByIdAsync(id);
+
+            if (model == null)
+                return null;
+
+            model.Date = dto.Date;
+            model.SupportingNo = dto.SupportingNo;
+            model.Particulars = dto.Particulars;
+            model.PaymentMode = dto.PaymentMode;
+            model.CurrencyType = dto.CurrencyType;
+            model.Amount = dto.Amount;
+            model.ConvertedAmount = dto.ConvertedAmount;
+            model.Remarks = dto.Remarks;
+            model.Screenshot = dto.Screenshot;
+
+            await _internationalRepository.UpdateAsync(model);
+
+            return dto;
+        }
+
+        /// <summary>
+        /// Deletes an international expense.
+        /// </summary>
+        public async Task<bool> DeleteInternationalAsync(Guid id)
+        {
+            var model = await _internationalRepository.GetByIdAsync(id);
+
+            if (model == null)
+                return false;
+
+            await _internationalRepository.DeleteAsync(id);
+            return true;
         }
     }
 }

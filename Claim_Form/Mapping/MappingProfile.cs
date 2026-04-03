@@ -7,8 +7,8 @@ namespace Claim_Form.Mapping
     public class MappingProfile:Profile
     {
         public MappingProfile() {
-            CreateMap<TravelDetails, TravelDetailsDtos>();
-            CreateMap<TravelDetailsDtos, TravelDetails>();
+            CreateMap<TravelDetails, TravelDetailsDto>();
+            CreateMap<TravelDetailsDto, TravelDetails>();
             CreateMap<RecentClaim, RecentClaimResponseDto>();
         }
     }

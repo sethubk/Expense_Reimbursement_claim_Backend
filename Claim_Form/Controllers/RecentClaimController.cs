@@ -2,214 +2,230 @@
 using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+
 namespace Claim_Form.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class RecentClaimController : ControllerBase
     {
         private readonly IRecentClaimService _recentClaimService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecentClaimController"/>.
+        /// </summary>
+        /// <param name="recentClaimService">Recent claim service.</param>
         public RecentClaimController(IRecentClaimService recentClaimService)
         {
             _recentClaimService = recentClaimService;
         }
 
         /// <summary>
-        /// get the Claim using the claimID id=claimid
+        /// Retrieves a single claim using its unique claim identifier.
         /// </summary>
-        /// <param name="id">Login payload containing EmpEmail and Password.</param>
-        /// <returns>Claims.</returns>
-        ///
-        [HttpGet("id:Guid")]
-        [SwaggerResponse(200, "Success", typeof(RecentClaimResponseDto))]
-        [SwaggerResponse(400, "Bad Request")]
-        [SwaggerResponse(404, "Not Found")]
-        [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> GetClaim(Guid id)
+        /// <param name="id">Claim identifier.</param>
+        /// <returns>Claim details.</returns>
+        [HttpGet("{id}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(RecentClaimResponseDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetClaim([FromRoute] Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest("Claim ID cannot be empty.");
 
             try
             {
-                // Validate input
-                if (id == Guid.Empty)
-                    return BadRequest("Claim ID cannot be empty.");
-
-                // Call service
-                var claim = await _recentClaimService.GetClaim(id);
+                var claim = await _recentClaimService.GetClaimAsync(id);
 
                 if (claim == null)
-                    return NotFound($"No claim found with ID: {id}");
+                    return NotFound($"No claim found with ID '{id}'.");
 
                 return Ok(claim);
             }
-            catch (KeyNotFoundException ex)
+            catch
             {
-                // For invalid parameters thrown in service
-                return NotFound(ex.Message);
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while retrieving the claim.");
             }
-
         }
+
         /// <summary>
-        /// create a Claim using the Empcode
+        /// Creates a new claim for a given employee.
         /// </summary>
-        /// <param name="Empcode">Create the Claim using the Empcode , this empcode is used to find the Employee</param>
-        /// <returns>Created Claims.</returns>
-        ///
-        [HttpPost("{Empcode}")]
-        [SwaggerResponse(200, "Success")]
-        //[SwaggerResponse(400, "Bad Request")]
-        //[SwaggerResponse(404, "Not Found")]
-        //[SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> CreateClaimAsync([FromBody] RecentClaimDto dto, [FromRoute] string Empcode)
+        /// <param name="dto">Claim creation details.</param>
+        /// <param name="empCode">Employee code.</param>
+        /// <returns>Created claim.</returns>
+        [HttpPost("{empCode}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateClaim(
+            [FromBody] RecentClaimDto dto,
+            [FromRoute] string empCode)
         {
-            if (dto == null) return BadRequest("Request body is required.");
-            if (string.IsNullOrWhiteSpace(Empcode)) return BadRequest("Empcode is required.");
+            if (dto == null)
+                return BadRequest("Request body is required.");
+
+            if (string.IsNullOrWhiteSpace(empCode))
+                return BadRequest("Employee code is required.");
 
             try
             {
-                var created = await _recentClaimService.CreateClaimAsync(dto, Empcode);
-                if (created is null) return BadRequest("Failed to create claim.");
+                var created = await _recentClaimService.CreateClaimAsync(dto, empCode);
+
+                if (created == null)
+                    return NotFound($"Employee with code '{empCode}' not found.");
+
                 return Ok(created);
             }
-            catch (ArgumentException ex)
+            catch
             {
-                return BadRequest(ex.Message);
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while creating the claim.");
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-           
         }
 
         /// <summary>
-        /// Updates an existing claim's details such as amount or status.  
-        /// This is typically used after adding or editing expenses tied to the claim.
+        /// Updates an existing claim for a specific employee.
         /// </summary>
-        /// <param name="Empcode">
-        /// The employee code used to identify the employee who owns the claim.
-        /// </param>
-        /// <param name="id">
-        /// The unique identifier of the claim to be updated.
-        /// </param>
-        /// <returns>
-        /// The updated claim details.
-        /// </returns>
-        [HttpPut("{Empcode}/{id:guid}")]
-        [SwaggerResponse(200, "Success")]
-        //[SwaggerResponse(400, "Bad Request")]
-        //[SwaggerResponse(404, "Not Found")]
-        //[SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> UpdateClaim([FromBody] UpdateClaimDto dto, [FromRoute] string Empcode, [FromRoute] Guid id)
+        /// <param name="dto">Updated claim details.</param>
+        /// <param name="empCode">Employee code.</param>
+        /// <param name="id">Claim identifier.</param>
+        /// <returns>Updated claim.</returns>
+        [HttpPut("{empCode}/{id:guid}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateClaim(
+            [FromBody] UpdateClaimDto dto,
+            [FromRoute] string empCode,
+            [FromRoute] Guid id)
         {
-            if (dto == null) return BadRequest("Request body is required.");
-            if (string.IsNullOrWhiteSpace(Empcode)) return BadRequest("Empcode is required.");
-            if (id == Guid.Empty) return BadRequest("Invalid claim id.");
+            if (dto == null)
+                return BadRequest("Request body is required.");
+
+            if (string.IsNullOrWhiteSpace(empCode))
+                return BadRequest("Employee code is required.");
+
+            if (id == Guid.Empty)
+                return BadRequest("Invalid claim id.");
 
             try
             {
-                var result = await _recentClaimService.UpdateClaimAsync(dto, Empcode, id);
-                if (result is null) return NotFound($"Claim {id} not found.");
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-           
-        }
+                var result = await _recentClaimService.UpdateClaimAsync(dto, empCode, id);
 
-        /// <summary>
-        /// Retrieves all claim records associated with a specific employee.
-        /// </summary>
-        /// <param name="empId">
-        /// The unique identifier (GUID) of the employee whose claims need to be fetched.
-        /// </param>
-        /// <returns>
-        /// A list of claims for the specified employee if found; otherwise, an appropriate HTTP error response.
-        /// </returns>
-        [HttpGet("{empId:guid}")]
-        [SwaggerResponse(200, "Success")]
-        public async Task<IActionResult> GetClaimByEmpID([FromRoute] Guid empId)
-        {
-            if (empId == Guid.Empty) return BadRequest("Invalid employee id.");
-
-            try
-            {
-                var result = await _recentClaimService.GetClaimByEmpID(empId);
-                if (result == null) return NotFound("No claim found for this employee.");
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
-            }
-        }
-        /// <summary>
-        /// Retrieves all claim records associated with a specific employee.
-        /// </summary>
-        /// <param name="Empcode">
-        /// the employee whose claims need to be fetched.
-        /// </param>
-        /// <returns>
-        /// A list of claims for the specified employee if found; otherwise, an appropriate HTTP error response.
-        /// </returns>
-
-        [HttpGet("{Empcode}")]
-        [SwaggerResponse(200, "Success")]
-        [SwaggerResponse(400, "Bad Request")]
-        [SwaggerResponse(404, "Not Found")]
-        [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> GetClaimByEmpCode([FromRoute] string Empcode)
-        {
-            if (string.IsNullOrWhiteSpace(Empcode)) return BadRequest("Empcode is required.");
-
-            try
-            {
-                var result = await _recentClaimService.GetClaimByEmpCode(Empcode);
-                if (result == null) return NotFound("No claim found for this employee.");
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-               
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
-            }
-        }
-        
-        [HttpDelete("draft/{Empcode}")]
-        [SwaggerResponse(200, "Success")]
-        [SwaggerResponse(400, "Bad Request")]
-        [SwaggerResponse(404, "Not Found")]
-        [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> DeleteDraft([FromRoute] string Empcode)
-        {
-            if (string.IsNullOrWhiteSpace(Empcode)) return BadRequest("Empcode is required.");
-
-            try
-            {
-                var result = await _recentClaimService.DeleteDraft(Empcode);
-
-                // If your service returns bool: use this block
-                if (result is bool okBool)
-                    return okBool ? NoContent() : NotFound("No draft found for this employee.");
-
-                // If your service returns an object: use this block
                 if (result == null)
-                    return NotFound("No claim found for this employee.");
+                    return NotFound($"Claim '{id}' not found.");
 
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch
             {
-               
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while updating the claim.");
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all claims for a specific employee using employee identifier.
+        /// </summary>
+        /// <param name="empId">Employee identifier.</param>
+        /// <returns>Employee claims.</returns>
+        [HttpGet("{empId}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetClaimByEmployeeId([FromRoute] Guid empId)
+        {
+            if (empId == Guid.Empty)
+                return BadRequest("Invalid employee id.");
+
+            try
+            {
+                var result = await _recentClaimService.GetClaimByEmpIDAsync(empId);
+
+                if (result == null)
+                    return NotFound("No claims found for this employee.");
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while retrieving claims.");
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all claims for a specific employee using employee code.
+        /// </summary>
+        /// <param name="empCode">Employee code.</param>
+        /// <returns>Employee claims.</returns>
+        [HttpGet("{empCode}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetClaimByEmpCode([FromRoute] string empCode)
+        {
+            if (string.IsNullOrWhiteSpace(empCode))
+                return BadRequest("Employee code is required.");
+
+            try
+            {
+                var result = await _recentClaimService.GetClaimByEmpCodeAsync(empCode);
+
+                if (result == null)
+                    return NotFound("No claims found for this employee.");
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while retrieving claims.");
+            }
+        }
+
+        /// <summary>
+        /// Deletes draft claims for a specific employee.
+        /// </summary>
+        /// <param name="empCode">Employee code.</param>
+        /// <returns>No content.</returns>
+        [HttpDelete("draft/{empCode}")]
+        [SwaggerResponse(StatusCodes.Status204NoContent)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteDraft([FromRoute] string empCode)
+        {
+            if (string.IsNullOrWhiteSpace(empCode))
+                return BadRequest("Employee code is required.");
+
+            try
+            {
+                var deleted = await _recentClaimService.DeleteDraftAsync(empCode);
+
+                if (deleted == null)
+                    return NotFound("No draft claim found for this employee.");
+
+                return NoContent();
+            }
+            catch
+            {
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while deleting the draft claim.");
             }
         }
     }

@@ -5,68 +5,92 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Claim_Form.Repositories.Implementations
 {
-    public class InternationalTravelRepository :IInternationalTravelRepository
+    /// <summary>
+    /// Repository implementation for travel details related data operations.
+    /// </summary>
+    public class InternationalTravelRepository : IInternationalTravelRepository
     {
         private readonly AppDbContext _context;
-        
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InternationalTravelRepository"/> class.
+        /// </summary>
+        /// <param name="context">Application database context.</param>
         public InternationalTravelRepository(AppDbContext context)
-
         {
             _context = context;
-            
         }
 
-        public async Task AddTravelDetails(TravelDetails travel)
+        /// <summary>
+        /// Adds new travel details for a claim.
+        /// </summary>
+        /// <param name="travelDetails">Travel details entity.</param>
+        public async Task AddAsync(TravelDetails travelDetails)
         {
-            _context.TravelDetails.Add(travel);
+            _context.TravelDetails.Add(travelDetails);
             await _context.SaveChangesAsync();
-            
         }
 
-        // ------------------------------
-        // UPDATE TravelDetails (ADD MORE CashInfo ITEMS)
-        // ------------------------------
-        public async Task<TravelDetails> UpdateTravelDetails(TravelDetails travel)
+        /// <summary>
+        /// Updates existing travel details.
+        /// </summary>
+        /// <param name="travelDetails">Travel details entity.</param>
+        /// <returns>Updated travel details.</returns>
+        public async Task<TravelDetails> UpdateAsync(TravelDetails travelDetails)
         {
-            _context.TravelDetails.Update(travel);
-            await _context.SaveChangesAsync();
-            return travel;
-        }
-
-        public async Task<TravelDetails> UpdateReimbersementStatus(Guid travelId, string status)
-        {
-
-            var travelDetails = await _context.TravelDetails
-                    .FirstOrDefaultAsync(t => t.TravelID == travelId);
-
-            if (travelDetails == null)
-                throw new InvalidOperationException("TravelDetails not found");
-
-            travelDetails.ReimbersementStatus = status;
-
-            
-
             _context.TravelDetails.Update(travelDetails);
             await _context.SaveChangesAsync();
             return travelDetails;
         }
 
-        // ------------------------------
-        // GET TravelDetails FOR A CLAIM
-        // INCLUDING CASH ENTRIES
-        // ------------------------------
-        public async Task<TravelDetails?> GetTravelByClaimId(Guid claimId)
+        /// <summary>
+        /// Updates the reimbursement status for a specific travel record.
+        /// </summary>
+        /// <param name="travelId">Travel identifier.</param>
+        /// <param name="status">New reimbursement status.</param>
+        /// <returns>Updated travel details.</returns>
+        public async Task<TravelDetails?> UpdateReimbursementStatusAsync(
+            Guid travelId,
+            string status)
+        {
+            var travelDetails = await _context.TravelDetails
+                .FirstOrDefaultAsync(t => t.Id == travelId);
+
+            if (travelDetails == null)
+                return null;
+
+            travelDetails.ReimbursementStatus = status;
+
+            _context.TravelDetails.Update(travelDetails);
+            await _context.SaveChangesAsync();
+
+            return travelDetails;
+        }
+
+        /// <summary>
+        /// Retrieves travel details for a given claim including cash/card entries.
+        /// </summary>
+        /// <param name="claimId">Claim identifier.</param>
+        /// <returns>Travel details if found; otherwise null.</returns>
+        public async Task<TravelDetails?> GetByClaimIdAsync(Guid claimId)
         {
             return await _context.TravelDetails
                 .Include(t => t.CardCashEntries)
+                .Include(t => t.Internationals)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.RecentClaimId == claimId);
         }
 
-        public async Task<TravelDetails> GetTravel(Guid travel)
+        /// <summary>
+        /// Retrieves travel details by travel identifier.
+        /// </summary>
+        /// <param name="travelId">Travel identifier.</param>
+        /// <returns>Travel details if found; otherwise null.</returns>
+        public async Task<TravelDetails?> GetByIdAsync(Guid travelId)
         {
-            return await _context.TravelDetails.FirstOrDefaultAsync(t=>t.RecentClaimId==travel);
+            return await _context.TravelDetails
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == travelId);
         }
-
     }
 }

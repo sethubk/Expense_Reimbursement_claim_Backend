@@ -9,109 +9,122 @@ using System.Text;
 
 namespace Claim_Form.Services.Implementations
 {
+    /// <summary>
+    /// Service implementation for employee-related operations.
+    /// </summary>
     public class EmployeeService : IEmployeeService
     {
-        private readonly IEmployeeRepository _authRepository;
+        private readonly IEmployeeRepository _employeeRepository;
         private readonly IConfiguration _configuration;
 
-        public EmployeeService(IConfiguration configuration, IEmployeeRepository authRepository)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EmployeeService"/> class.
+        /// </summary>
+        public EmployeeService(
+            IConfiguration configuration,
+            IEmployeeRepository employeeRepository)
         {
             _configuration = configuration;
-            _authRepository = authRepository;
-
+            _employeeRepository = employeeRepository;
         }
-        public async Task<EmployeeResponseDtos> GetEmployeeAsync(EmployeeLoginDtos dto)
+
+        /// <summary>
+        /// Authenticates an employee and returns employee details.
+        /// </summary>
+        /// <param name="dto">Employee login credentials.</param>
+        /// <returns>Employee response DTO.</returns>
+        public async Task<EmployeeResponseDto> GetEmployeeAsync(EmployeeLoginDto dto)
         {
-            var Employee = await _authRepository.GetEmployeeAsync(dto.Email);
-            if (Employee == null)
+            var employee = await _employeeRepository
+                .GetEmployeeByEmailAsync(dto.Email);
+
+            if (employee == null)
+                throw new InvalidOperationException("Invalid employee email.");
+
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, employee.PasswordHash))
+                throw new InvalidOperationException("Invalid password.");
+
+            var token = GenerateJwtToken(employee);
+
+            return new EmployeeResponseDto
             {
-
-                throw new Exception("invalid Employeee Email");
-            }
-
-            if (!BCrypt.Net.BCrypt.Verify(dto.Password, Employee.passwordHash))
-            {
-                throw new Exception("invalid password");
-            }
-            var token = GenerateJwtToken(Employee);
-
-            return new EmployeeResponseDtos
-            {
-
-                EmpCode = Employee.EmpCode,
-                Name = Employee.Name,
-                Department = Employee.Department,
-                Role = Employee.Role,
-                Email = Employee.Email,
-                VenderCost = Employee.VenderCost,
-                CostCenter = Employee.CostCenter
+                EmpCode = employee.EmpCode,
+                Name = employee.Name,
+                Department = employee.Department,
+                Role = employee.Role,
+                Email = employee.Email,
+                VendorCost = employee.VendorCost,
+                CostCenter = employee.CostCenter
             };
-
-        }
-        private string GenerateJwtToken(Employee employee)
-        {
-            //var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-
-            var key = new SymmetricSecurityKey(
-          Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
-      );
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, employee.Name),
-                    new Claim("EmpCode", employee.EmpCode),
-                    new Claim("Department", employee.Department ?? ""),
-                    new Claim(ClaimTypes.Role, employee.Role ?? ""),
-                    new Claim(ClaimTypes.Email, employee.Email ?? ""),
-                    new Claim("VenderCost", employee.VenderCost ?? ""),
-                    new Claim("CostCenter", employee.CostCenter ?? "")
-                };
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                 claims: claims,
-           expires: DateTime.Now.AddHours(2),
-           signingCredentials: credentials
-                );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<EmpWithClaimDto?> AllEmp(string EmpCode)
+        /// <summary>
+        /// Retrieves employee details along with their claims.
+        /// </summary>
+        /// <param name="empCode">Employee code.</param>
+        /// <returns>Employee with claims DTO.</returns>
+        public async Task<EmpWithClaimDto?> GetEmployeeWithClaimsAsync(string empCode)
         {
-            var emp = await _authRepository.GetEmployee(EmpCode);
-            if (emp != null)
-            {
-                var emp1 = await _authRepository.GetEmployeewithClaim(EmpCode);
+            var employee = await _employeeRepository
+                .GetEmployeeWithClaimsAsync(empCode);
 
-            }
-            else
-            {
-                throw new Exception("emp not found");
-            }
+            if (employee == null)
+                return null;
 
             return new EmpWithClaimDto
             {
-                EmpCode = emp.EmpCode,
-                Name = emp.Name,
-                Email = emp.Email,
-                VenderCost = emp.VenderCost,
-                Department = emp.Department,
-                RecentClaims = emp.RecentClaims.Select(c => new RecentClaimDto
-                {
-                    Type = c.Type,
-                    Date = c.Date,
-                    Purpose = c.Purpose,
-                    Amount = c.Amount,
-                    Status = c.Status,
-
-
-                }).ToList()
-
+                EmpCode = employee.EmpCode,
+                Name = employee.Name,
+                Email = employee.Email,
+                Department = employee.Department,
+                VendorCost = employee.VendorCost,
+                RecentClaims = employee.RecentClaims
+                    .Select(c => new RecentClaimDto
+                    {
+                        Type = c.Type,
+                        Date = c.Date,
+                        Purpose = c.Purpose,
+                        Amount = c.Amount,
+                        Status = c.Status
+                    })
+                    .ToList()
             };
         }
+
+        /// <summary>
+        /// Generates a JWT token for an authenticated employee.
+        /// </summary>
+        private string GenerateJwtToken(Employee employee)
+        {
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
+            );
+
+            var credentials = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, employee.Name),
+                new Claim(ClaimTypes.Email, employee.Email),
+                new Claim(ClaimTypes.Role, employee.Role),
+                new Claim("EmpCode", employee.EmpCode),
+                new Claim("Department", employee.Department),
+                new Claim("VendorCost", employee.VendorCost),
+                new Claim("CostCenter", employee.CostCenter)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(2),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
-    
 }
-
-

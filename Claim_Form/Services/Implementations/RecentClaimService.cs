@@ -1,173 +1,164 @@
-﻿using AutoMapper;
-using Claim_Form.Dtos;
+﻿using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+
 namespace Claim_Form.Services.Implementations
 {
+    /// <summary>
+    /// Service implementation for recent-claim related operations.
+    /// </summary>
     public class RecentClaimService : IRecentClaimService
     {
-        private readonly IRecentClaimRepository _recentRepository;
+        private readonly IRecentClaimRepository _claimRepository;
         private readonly IEmployeeRepository _employeeRepository;
-        private readonly IMapper _mapper;
-        public RecentClaimService(IRecentClaimRepository recentRepository, IEmployeeRepository employeeRepository, IMapper mapper)
+
+        public RecentClaimService(
+            IRecentClaimRepository claimRepository,
+            IEmployeeRepository employeeRepository)
         {
-            _recentRepository = recentRepository;
+            _claimRepository = claimRepository;
             _employeeRepository = employeeRepository;
-            _mapper = mapper;
         }
-        public async Task<RecentClaimResponseDto> CreateClaimAsync(RecentClaimDto dto, string EmpCode)
+
+        /// <summary>
+        /// Creates a new claim for an employee.
+        /// </summary>
+        public async Task<RecentClaimResponseDto> CreateClaimAsync(
+            RecentClaimDto dto,
+            string empCode)
         {
-            var emp = await _employeeRepository.GetEmployee(EmpCode);
-            if (emp != null)
+            var employee = await _employeeRepository.GetEmployeeByCodeAsync(empCode);
+
+            if (employee == null)
+                throw new InvalidOperationException($"Employee with code '{empCode}' not found.");
+
+            var claim = new RecentClaim
             {
-                var recent = new RecentClaim
-                {
-                    EmpId = emp.Id,
-                    Type = dto.Type,
-                    Date = dto.Date,
-                    Purpose = dto.Purpose,
-                    Status = dto.Status,
-                    Amount = dto.Amount,
-                };
-               var claim= await _recentRepository.CreateClaimAsync(recent);
-              
-                var res = new RecentClaimResponseDto
-                {
-                    RecentClaimId = claim.RecentClaimId,
-                    Type = claim.Type,
-                    Date = claim.Date,
-                    Purpose = claim.Purpose,
-                    Status = claim.Status,
-                    Amount = claim.Amount
-
-
-                };
-                return res;
-            }
-            else
-            {
-                throw new InvalidOperationException($"Employee with code '{EmpCode}' not found.");
-            }
-
-        }
-        public async Task<RecentClaimDto> UpdateClaimAsync(UpdateClaimDto dto, string EmpCode, Guid id)
-        {
-            var emp = await _employeeRepository.GetEmployee(EmpCode);
-            if (emp != null)
-            {
-                var claim = await _recentRepository.GetClaim(id);
-                if (claim != null)
-                {
-
-                    claim.Status = dto.Status;
-                    claim.Amount = dto.Amount;
-
-
-                    claim.EmpId = emp.Id;
-
-                    await _recentRepository.UpdateClaim(claim);
-                }
-            }
-            else
-            {
-                return null;
-            }
-            var updateOutput = new RecentClaimDto
-            {
+                EmpId = employee.Id,
+                Type = dto.Type,
+                Date = dto.Date,
+                Purpose = dto.Purpose,
                 Status = dto.Status,
-                Amount = dto.Amount,
+                Amount = dto.Amount
             };
-            return updateOutput;
+
+            var created = await _claimRepository.CreateAsync(claim);
+
+            return new RecentClaimResponseDto
+            {
+                RecentClaimId = created.Id,
+                Type = created.Type,
+                Date = created.Date,
+                Purpose = created.Purpose,
+                Status = created.Status,
+                Amount = created.Amount
+            };
         }
 
-        // var output= await _recentRepository.GetClaim(id);
-
-        //var output1 =new RecentClaimDto
-        //{
-        //     Status = output.Status,
-        //     Amount = output.Amount,};
-        // }
-
-        public async Task<RecentClaimDto?> GetClaim(Guid id)
+        /// <summary>
+        /// Updates an existing claim.
+        /// </summary>
+        public async Task<RecentClaimDto?> UpdateClaimAsync(
+            UpdateClaimDto dto,
+            string empCode,
+            Guid claimId)
         {
-            var claim = await _recentRepository.GetClaim(id);
+            var employee = await _employeeRepository.GetEmployeeByCodeAsync(empCode);
+            if (employee == null)
+                return null;
 
-            return claim == null ? null : new RecentClaimDto
+            var claim = await _claimRepository.GetByIdAsync(claimId);
+            if (claim == null)
+                return null;
+
+            claim.Status = dto.Status;
+            claim.Amount = dto.Amount;
+            claim.EmpId = employee.Id;
+
+            await _claimRepository.UpdateAsync(claim);
+
+            return new RecentClaimDto
             {
                 Type = claim.Type,
                 Date = claim.Date,
                 Purpose = claim.Purpose,
                 Status = claim.Status,
-                Amount = claim.Amount,
-
+                Amount = claim.Amount
             };
-
         }
-        public async Task<RecentClaimResponseDto?> GetClaimByEmpID(Guid id)
+
+        /// <summary>
+        /// Retrieves a claim by its identifier.
+        /// </summary>
+        public async Task<RecentClaimDto?> GetClaimAsync(Guid id)
         {
-            var emp = await _employeeRepository.GetEmployeeById(id);
-            if (emp != null)
-            {
-                var claim = await _recentRepository.GetClaimByEmpIdAsync(id);
+            var claim = await _claimRepository.GetByIdAsync(id);
 
-                return claim == null ? null : new RecentClaimResponseDto
-                {
-                    RecentClaimId = claim.RecentClaimId,
-                    Type = claim.Type,
-                    Date = claim.Date,
-                    Purpose = claim.Purpose,
-                    Status = claim.Status,
-                    Amount = claim.Amount,
-
-                };
-            }
-            else
-            {
-                return null;
-            }
-
-        }
-        public async Task<List<RecentClaimResponseDto>> GetClaimByEmpCode(string Empcode)
-        {
-            var emp = await _employeeRepository.GetEmployee(Empcode);
-            if (emp == null) return null;
-
-            var claim = await _recentRepository.GetClaimByEmpCode(Empcode);
-            if (claim == null) return null;
-
-            //return claim.Select(claim => new RecentClaimResponseDto
-            //{
-            //    RecentClaimId = claim.RecentClaimId,
-            //    Type = claim.Type,
-            //    Date = claim.Date,
-            //    Purpose = claim.Purpose,
-            //    Status = claim.Status,
-            //    Amount= claim.Amount
-            //}).ToList();
-            return _mapper.Map<List<RecentClaimResponseDto>>(claim);
-
-        }
-        public async Task<bool> DeleteDraft(string EmpCode)
-        {
-            var claim = _recentRepository.GetClaimByEmpCode(EmpCode);
             if (claim == null)
-            {
-                throw new InvalidOperationException("Claim not found");
-            }
-            try
-            {
-               var deleted= _recentRepository.DeleteDraft(EmpCode);
-                
-                    return true; 
-               
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-        
+                return null;
 
+            return new RecentClaimDto
+            {
+                Type = claim.Type,
+                Date = claim.Date,
+                Purpose = claim.Purpose,
+                Status = claim.Status,
+                Amount = claim.Amount
+            };
+        }
+
+        /// <summary>
+        /// Retrieves all claims for an employee by employee ID.
+        /// </summary>
+        public async Task<List<RecentClaimResponseDto>> GetClaimByEmpIDAsync(Guid empId)
+        {
+            var claims = await _claimRepository.GetByEmployeeIdAsync(empId);
+
+            return claims.Select(c => new RecentClaimResponseDto
+            {
+                RecentClaimId = c.Id,
+                Type = c.Type,
+                Date = c.Date,
+                Purpose = c.Purpose,
+                Status = c.Status,
+                Amount = c.Amount
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Retrieves all claims for an employee by employee code.
+        /// </summary>
+        public async Task<List<RecentClaimResponseDto>> GetClaimByEmpCodeAsync(string empCode)
+        {
+            var employee = await _employeeRepository.GetEmployeeByCodeAsync(empCode);
+            if (employee == null)
+                return new List<RecentClaimResponseDto>();
+
+            var claims = await _claimRepository.GetByEmployeeCodeAsync(empCode);
+
+            return claims.Select(c => new RecentClaimResponseDto
+            {
+                RecentClaimId = c.Id,
+                Type = c.Type,
+                Date = c.Date,
+                Purpose = c.Purpose,
+                Status = c.Status,
+                Amount = c.Amount
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Deletes draft claims for an employee.
+        /// </summary>
+        public async Task<bool> DeleteDraftAsync(string empCode)
+        {
+            var employee = await _employeeRepository.GetEmployeeByCodeAsync(empCode);
+            if (employee == null)
+                return false;
+
+            await _claimRepository.DeleteDraftAsync(empCode);
+            return true;
+        }
     }
 }

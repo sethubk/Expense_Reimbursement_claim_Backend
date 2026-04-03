@@ -1,124 +1,105 @@
-﻿using Claim_Form.Data;
-using Claim_Form.Dtos;
+﻿using Claim_Form.Dtos;
 using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Claim_Form.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class EmployeeController : ControllerBase
     {
-        private readonly IEmployeeService _service;
-        private readonly AppDbContext _context;
+        private readonly IEmployeeService _employeeService;
 
-        public EmployeeController(IEmployeeService service, AppDbContext context)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EmployeeController"/> class.
+        /// </summary>
+        /// <param name="employeeService">Employee service dependency.</param>
+        public EmployeeController(IEmployeeService employeeService)
         {
-            _service = service;
-            _context = context;
+            _employeeService = employeeService;
         }
 
         /// <summary>
-        /// Logs an employee using an email and password.
+        /// Authenticates an employee using email and password.
         /// </summary>
-        /// <param name="dto">Login payload containing EmpEmail and Password.</param>
-        /// <returns>JWT token and basic user information on success.</returns>
-        /// <remarks>
-        /// On success returns a short-lived JWT access token. Consider using HTTPS and secure storage.
-        /// </remarks>
-        [HttpPost("Login")]
-        [SwaggerResponse(200, "Success", typeof(EmployeeResponseDtos))]
+        /// <param name="dto">Login payload containing employee email and password.</param>
+        /// <returns>
+        /// Returns employee details along with JWT token if authentication is successful.
+        /// </returns>
+        /// <response code="200">Login successful.</response>
+        /// <response code="400">Invalid request payload.</response>
+        /// <response code="401">Invalid email or password.</response>
+        /// <response code="500">Internal server error.</response>
+        [HttpPost]
+        [SwaggerResponse(200, "Success", typeof(EmployeeResponseDto))]
         [SwaggerResponse(400, "Bad Request")]
-        [SwaggerResponse(404, "Not Found")]
+        [SwaggerResponse(401, "Unauthorized")]
         [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> Login(EmployeeLoginDtos dto)
+        public async Task<IActionResult> Login([FromBody] EmployeeLoginDto dto)
         {
             if (dto == null)
             {
-                return BadRequest(
-                    $"Error in {nameof(Login)}");
+                return BadRequest("Login details are required.");
             }
+
             try
             {
-                var result = await _service.GetEmployeeAsync(dto);
-                return Ok(result);
+                var response = await _employeeService.GetEmployeeAsync(dto);
+
+                if (response == null)
+                {
+                    return Unauthorized("Invalid email or password.");
+                }
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                // Ideally log the exception here
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing the login request.");
             }
         }
 
-        ///// <summary>
-        ///// Logs an employee in using email and password and returns a JWT access token.
-        ///// </summary>
-        ///// <param name="dto">Login payload containing EmpEmail and Password.</param>
-        ///// <returns>JWT token and basic user information on success.</returns>
-        ///// <remarks>
-        ///// On success returns a short-lived JWT access token. Consider using HTTPS and secure storage.
-        ///// </remarks>
-        //[HttpPost("add")]
-        //[SwaggerResponse(200, "Success")]
-        //[SwaggerResponse(400, "Bad Request")]
-        //[SwaggerResponse(404, "Not Found")]
-        //[SwaggerResponse(500, "Internal Server Error")]
-        //public IActionResult AddEmployee()
-        //{
-        //    var emp = new Employee
-        //    {
-        //        EmpCode = "EMP002",
-        //        passwordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
-        //        Name = "prabhu",
-        //        Department = "Mtl",
-        //        Role = "Admin",
-        //        Email = "prabhu@gmail.com",
-        //        VenderCost ="ven1234",
-        //        CostCenter = "CC1023"
-        //    };
-
-        //    _context.Employees.Add(emp);
-        //    _context.SaveChanges();
-
-        //    return Ok("Employee Added Successfully");
-        //}
-
-
         /// <summary>
-        /// Get the Employee Details using Empcode.
+        /// Retrieves all claims for a specific employee using employee code.
         /// </summary>
-        /// <param name="EmpCode">Login payload containing EmpEmail and Password.</param>
-        /// <returns>JWT token and basic user information on success.</returns>
-        /// <remarks>
-        /// On success returns a short-lived JWT access token. Consider using HTTPS and secure storage.
-        /// </remarks>
-        [HttpGet("{EmpCode}")]
+        /// <param name="empCode">Unique employee code.</param>
+        /// <returns>List of claims associated with the employee.</returns>
+        /// <response code="200">Claims retrieved successfully.</response>
+        /// <response code="400">Employee code is invalid.</response>
+        /// <response code="404">No claims found for the given employee code.</response>
+        /// <response code="500">Internal server error.</response>
+        [HttpGet("{empCode}")]
         [SwaggerResponse(200, "Success")]
         [SwaggerResponse(400, "Bad Request")]
         [SwaggerResponse(404, "Not Found")]
         [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> GetEmployeeClaims(string EmpCode)
+        public async Task<IActionResult> GetEmployeeClaims(string empCode)
         {
-
-            if (string.IsNullOrWhiteSpace(EmpCode))
+            if (string.IsNullOrWhiteSpace(empCode))
+            {
                 return BadRequest("Employee code is required.");
+            }
 
             try
             {
-                var result = await _service.AllEmp(EmpCode);
+                var claims = await _employeeService.GetEmployeeWithClaimsAsync(empCode);
 
-                if (result is null )
-                    return NotFound($"No claims found for employee code '{EmpCode}'.");
+                if (claims == null)
+                {
+                    return NotFound($"No claims found for employee code '{empCode}'.");
+                }
 
-                return Ok(result);
+                return Ok(claims);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                throw;
-
+                // Ideally log the exception here
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while retrieving employee claims.");
             }
         }
     }
 }
-
-

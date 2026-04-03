@@ -1,150 +1,134 @@
-﻿using AutoMapper;
-using Claim_Form.Dtos;
+﻿using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Diagnostics;
-using System.Security.Claims;
 
 namespace Claim_Form.Services.Implementations
 {
-    public class InternationalTravelService:IInternationalTravelService
+    /// <summary>
+    /// Service implementation for international travel details operations.
+    /// </summary>
+    public class InternationalTravelService : IInternationalTravelService
     {
+        private readonly IInternationalTravelRepository _travelRepository;
+        private readonly IRecentClaimRepository _claimRepository;
 
-        private readonly IInternationalTravelRepository _internationalTravelRepository;
-        private readonly IMapper _mapper;
-        private readonly IRecentClaimRepository _RecentRepository;
-
-        public InternationalTravelService(IInternationalTravelRepository internationalTravelRepository,IMapper mapper,IRecentClaimRepository recentClaimRepository)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InternationalTravelService"/> class.
+        /// </summary>
+        public InternationalTravelService(
+            IInternationalTravelRepository travelRepository,
+            IRecentClaimRepository claimRepository)
         {
-            _internationalTravelRepository = internationalTravelRepository;
-            _mapper = mapper;
-            _RecentRepository = recentClaimRepository;
+            _travelRepository = travelRepository;
+            _claimRepository = claimRepository;
         }
-        public async Task<TravelDetailsDtos>AddTravelDetails( Guid ClaimID, TravelDetailsDtos travelDetailsDtos)
+
+        /// <summary>
+        /// Adds or updates travel details for a claim.
+        /// </summary>
+        public async Task<TravelDetailsDto> AddTravelDetailsAsync(
+            Guid claimId,
+            TravelDetailsDto dto)
         {
-            var claim1 = await _RecentRepository.GetClaim(ClaimID);
-            if (claim1 == null)
+            var claim = await _claimRepository.GetByIdAsync(claimId);
+
+            if (claim == null)
+                throw new InvalidOperationException("Claim not found.");
+
+            // Try to fetch existing travel details
+            var travel = await _travelRepository.GetByClaimIdAsync(claimId);
+
+            if (travel == null)
             {
-                throw new ArgumentNullException(nameof(claim1));
-            }
-            var travel1= await _internationalTravelRepository.GetTravel(ClaimID);
-            if (travel1 == null)
-            {
-                //var travel = _mapper.Map<TravelDetails>(travelDetailsDtos);
-                //travel.RecentClaimId = ClaimID;
-                //var created = await _internationalTravelRepository.AddTravelDetails(travel);
-                //return _mapper.Map<TravelDetailsDtos>(created);
-                var travel = new TravelDetails
+                // ✅ Create new travel details
+                travel = new TravelDetails
                 {
-                    CurrecncyType = travelDetailsDtos.CurrencyType,
-                    TravelStartDate = travelDetailsDtos.TravelStartDate,
-                    TravelEndDate = travelDetailsDtos.TravelEndDate,
-                    TotalDays = travelDetailsDtos.TotalDays,
-                    AdvanceAmount = travelDetailsDtos.AdvanceAmount,
-                    RecentClaimId = claim1.RecentClaimId,
-                    ReimbersementStatus = "Pending",
-                    CardCashEntries = travelDetailsDtos.CardCashEntries.Select(c => new CashInfo
-                        {
-                            LoadedDate=c.LoadedDate,
-                            Type = c.Type,
-                            INRRate = c.INRRate,
-                            TotalLoaded = c.TotalLoaded,
-                        }).ToList()
-       
-            }; 
-               await _internationalTravelRepository.AddTravelDetails(travel);
-                //return _mapper.Map<TravelDetailsDtos>(travel);
-
-                //return new TravelDetailsDtos
-                //{
-                    
-                //    CurrencyType = travel.CurrecncyType,  // spelling fix
-                //    TravelStartDate = travel.TravelStartDate,
-                //    TravelEndDate = travel.TravelEndDate,
-                //    TotalDays = travel.TotalDays,
-                //    AdvanceAmount= travel.AdvanceAmount,
-                  
-
-                //    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
-                //    {
-                //        LoadedDate = c.TotalLoaded,
-                //        Type = c.Type,
-                //        INRRate = c.INRRate,
-                //        TotalLoaded = c.TotalLoaded,
-                //    }).ToList()
-                //};
-                return _mapper.Map<TravelDetailsDtos>(travel);
-
-            }
-
-            else
-            {
-
-                var travel = claim1.TravelDetails; // Assuming 1:1 per claim
-              
-                foreach (var c in travelDetailsDtos.CardCashEntries)
-                {
-                    travel.CardCashEntries.Add(new CashInfo
+                    CurrencyType = dto.CurrencyType,
+                    TravelStartDate = dto.TravelStartDate,
+                    TravelEndDate = dto.TravelEndDate,
+                    TotalDays = dto.TotalDays,
+                    AdvanceAmount = dto.AdvanceAmount,
+                    ReimbursementStatus = "Pending",
+                    RecentClaimId = claimId,
+                    CardCashEntries = dto.CardCashEntries.Select(c => new CashInfo
                     {
                         LoadedDate = c.LoadedDate,
-                        Type = c.Type,
-                        INRRate = c.INRRate,
-                        TotalLoaded = c.TotalLoaded,
-                        TravelId = travel.TravelID
-
-                    });
-                }
-                travel.AdvanceAmount = travelDetailsDtos.AdvanceAmount;
-                await _internationalTravelRepository.UpdateTravelDetails(travel);
-
-                // return updated DTO
-                return new TravelDetailsDtos
-                {
-                    
-                    CurrencyType = travel.CurrecncyType,
-                    TravelStartDate = travel.TravelStartDate,
-                    TravelEndDate = travel.TravelEndDate,
-                    TotalDays = travel.TotalDays,
-                    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
-                    {
-                        LoadedDate = c.LoadedDate,
-                        Type = c.Type,
-                        INRRate = c.INRRate,
-                        TotalLoaded = c.TotalLoaded
+                        PaymentType = c.PaymentType,
+                        InrRate = c.InrRate,
+                        TotalLoadedAmount = c.TotalLoadedAmount
                     }).ToList()
                 };
 
+                await _travelRepository.AddAsync(travel);
             }
-            //return  return _mapper.Map<TravelDetailsDtos>(created);
-
-        }
-        public async Task<TravelDetailsDtos?> GetTravelByClaimId(Guid claimId)
-        {
-            var travel = await _internationalTravelRepository.GetTravelByClaimId(claimId);
-
-            if (travel == null)
-                return null;
-
-            // MANUAL MAPPING (clean & complete)
-            return new TravelDetailsDtos
+            else
             {
-                
-                CurrencyType = travel.CurrecncyType,
+                // ✅ Update existing travel details
+                travel.CurrencyType = dto.CurrencyType;
+                travel.TravelStartDate = dto.TravelStartDate;
+                travel.TravelEndDate = dto.TravelEndDate;
+                travel.TotalDays = dto.TotalDays;
+                travel.AdvanceAmount = dto.AdvanceAmount;
+
+                foreach (var entry in dto.CardCashEntries)
+                {
+                    travel.CardCashEntries.Add(new CashInfo
+                    {
+                        LoadedDate = entry.LoadedDate,
+                        PaymentType = entry.PaymentType,
+                        InrRate = entry.InrRate,
+                        TotalLoadedAmount = entry.TotalLoadedAmount,
+                        TravelId = travel.Id
+                    });
+                }
+
+                await _travelRepository.UpdateAsync(travel);
+            }
+
+            // ✅ Return updated DTO
+            return new TravelDetailsDto
+            {
+                CurrencyType = travel.CurrencyType,
                 TravelStartDate = travel.TravelStartDate,
                 TravelEndDate = travel.TravelEndDate,
                 TotalDays = travel.TotalDays,
-                AdvanceAmount=travel.AdvanceAmount,
-                CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDtos
+                AdvanceAmount = travel.AdvanceAmount,
+                CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
                 {
                     LoadedDate = c.LoadedDate,
-                    Type = c.Type,
-                    INRRate = c.INRRate,
-                    TotalLoaded = c.TotalLoaded
+                    PaymentType = c.PaymentType,
+                    InrRate = c.InrRate,
+                    TotalLoadedAmount = c.TotalLoadedAmount
                 }).ToList()
             };
         }
 
+        /// <summary>
+        /// Retrieves travel details by claim identifier.
+        /// </summary>
+        public async Task<TravelDetailsDto?> GetTravelByClaimIdAsync(Guid claimId)
+        {
+            var travel = await _travelRepository.GetByClaimIdAsync(claimId);
+
+            if (travel == null)
+                return null;
+
+            return new TravelDetailsDto
+            {
+                CurrencyType = travel.CurrencyType,
+                TravelStartDate = travel.TravelStartDate,
+                TravelEndDate = travel.TravelEndDate,
+                TotalDays = travel.TotalDays,
+                AdvanceAmount = travel.AdvanceAmount,
+                CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
+                {
+                    LoadedDate = c.LoadedDate,
+                    PaymentType = c.PaymentType,
+                    InrRate = c.InrRate,
+                    TotalLoadedAmount = c.TotalLoadedAmount
+                }).ToList()
+            };
+        }
     }
 }

@@ -2,188 +2,123 @@
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+
 namespace Claim_Form.Services.Implementations
-{ 
-        public class ExpenseService : IExpenseService
+{
+    /// <summary>
+    /// Service implementation for expense-related business operations.
+    /// </summary>
+    public class ExpenseService : IExpenseService
+    {
+        private readonly IExpenseRepository _expenseRepository;
+        private readonly IRecentClaimRepository _recentClaimRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExpenseService"/> class.
+        /// </summary>
+        public ExpenseService(
+            IExpenseRepository expenseRepository,
+            IRecentClaimRepository recentClaimRepository)
         {
+            _expenseRepository = expenseRepository;
+            _recentClaimRepository = recentClaimRepository;
+        }
 
-            private readonly IRecentClaimRepository _RecentRepository;
-
-            private readonly IExpenseRepository _ExpenseRepository;
-            private readonly ILogger<ExpenseService> _logger;
-
-            public ExpenseService(IExpenseRepository expenseRepository, IRecentClaimRepository recentClaimRepository, ILogger<ExpenseService> logger)
-            {
-                _ExpenseRepository = expenseRepository;
-                _RecentRepository = recentClaimRepository;
-                _logger = logger;
-            }
-
-            public async Task<ExpenseDto> AddExpense(Guid claimid, ExpenseDto dto)
-            {
-                var claim1 = await _RecentRepository.GetClaim(claimid);
-                if (claim1 == null)
-                {
-                    throw new ArgumentNullException(nameof(claim1));
-                }
-                var expense = new Expense
-                {
-                    RecentClaimId = claim1.RecentClaimId,
-                    Date = dto.Date,
-                    SupportingNo = dto.SupportingNo,
-                    Particulars = dto.Particulars,
-                    PaymentMode = dto.PaymentMode,
-                    Amount = dto.Amount,
-                    Remarks = dto.Remarks,
-                    Screenshot = dto.Screenshot,
-
-                };
-                await _ExpenseRepository.AddExpense(expense);
-
-                return new ExpenseDto
-                {
-                    Date = dto.Date,
-                    SupportingNo = dto.SupportingNo,
-                    Particulars = dto.Particulars,
-                    PaymentMode = dto.PaymentMode,
-                    Amount = dto.Amount,
-                    Remarks = dto.Remarks,
-                    Screenshot = dto.Screenshot,
-
-
-                };
-            }
-        public async Task<IEnumerable<ExpenseDto>> CreateBulkAsync(Guid claimId, List<ExpenseEntryDto> entries)
+        /// <summary>
+        /// Creates multiple expense entries for a claim.
+        /// </summary>
+        public async Task<IEnumerable<ExpenseDto>> CreateBulkAsync(
+            Guid claimId,
+            List<ExpenseEntryDto> entries)
         {
-            // (Optional) Validate the claim exists
-            var claim = await _RecentRepository.GetClaim(claimId);
-            if (claim == null) throw new InvalidOperationException("Claim not found.");
+            var claim = await _recentClaimRepository.GetByIdAsync(claimId);
 
-            var models = entries.Select(e => new Expense
+            if (claim == null)
+                throw new InvalidOperationException("Claim not found.");
+
+            var expenses = entries.Select(e => new Expense
             {
                 RecentClaimId = claimId,
-                Amount = e.Amount,
                 Date = e.Date,
+                SupportingNo = e.SupportingNo,
                 Particulars = e.Particulars,
                 PaymentMode = e.PaymentMode,
-                Remarks = e.Remarks,
-                SupportingNo = e.SupportingNo,
-                Screenshot = e.Screenshot
-            }).ToList();
-
-            await _ExpenseRepository.CreateBulkAsync(models);
-            return models.Select(e => new ExpenseDto
-            {
                 Amount = e.Amount,
-                Date = e.Date,
-                Particulars =e.Particulars,
-                PaymentMode = e.PaymentMode,
                 Remarks = e.Remarks,
-                SupportingNo = e.SupportingNo,
-                Screenshot = e.Screenshot,
-
-
-
+                Screenshot = e.Screenshot ?? string.Empty
             }).ToList();
+
+            await _expenseRepository.AddBulkAsync(expenses);
+
+            return expenses.Select(e => new ExpenseDto
+            {
+                Date = e.Date,
+                SupportingNo = e.SupportingNo,
+                Particulars = e.Particulars,
+                PaymentMode = e.PaymentMode,
+                Amount = e.Amount,
+                Remarks = e.Remarks,
+                Screenshot = e.Screenshot
+            });
         }
-            public async Task<ExpenseDto?> GetExpenseAsync(Guid id)
+
+        /// <summary>
+        /// Retrieves an expense by its identifier.
+        /// </summary>
+        public async Task<ExpenseDto?> GetExpenseAsync(Guid id)
+        {
+            var expense = await _expenseRepository.GetByIdAsync(id);
+
+            if (expense == null)
+                return null;
+
+            return new ExpenseDto
             {
-                try
-                {
-                    var expense = await _ExpenseRepository.GetExpenseById(id);
+                Date = expense.Date,
+                SupportingNo = expense.SupportingNo,
+                Particulars = expense.Particulars,
+                PaymentMode = expense.PaymentMode,
+                Amount = expense.Amount,
+                Remarks = expense.Remarks,
+                Screenshot = expense.Screenshot
+            };
+        }
 
-                    return expense == null ? null : new ExpenseDto
-                    {
-                        Date = expense.Date,
-                        SupportingNo = expense.SupportingNo,
-                        Particulars = expense.Particulars,
-                        PaymentMode = expense.PaymentMode,
-                        Amount = expense.Amount,
-                        Remarks = expense.Remarks,
-                        Screenshot = expense.Screenshot,
+        /// <summary>
+        /// Updates an existing expense.
+        /// </summary>
+        public async Task<ExpenseDto?> UpdateExpenseAsync(Guid id, ExpenseDto dto)
+        {
+            var expense = await _expenseRepository.GetByIdAsync(id);
 
-                    };
+            if (expense == null)
+                return null;
 
-                }
+            expense.Date = dto.Date;
+            expense.SupportingNo = dto.SupportingNo;
+            expense.Particulars = dto.Particulars;
+            expense.PaymentMode = dto.PaymentMode;
+            expense.Amount = dto.Amount;
+            expense.Remarks = dto.Remarks;
+            expense.Screenshot = dto.Screenshot;
 
-                catch (Exception EmployeenotFound)
-                {
-                    throw (EmployeenotFound);
+            await _expenseRepository.UpdateAsync(expense);
 
-                }
-            }
+            return dto;
+        }
 
-            public async Task<ExpenseDto> UpdateExpense(Guid id, ExpenseDto dto)
-            {
-                try
-                {
-                    var expense = await _ExpenseRepository.GetExpenseById(id);
+        /// <summary>
+        /// Deletes an expense by its identifier.
+        /// </summary>
+        public async Task<bool> DeleteExpenseAsync(Guid id)
+        {
+            var expense = await _expenseRepository.GetByIdAsync(id);
 
-                    if (expense == null)
-                    {
-                        throw new KeyNotFoundException("Expense not found");
-                    }
+            if (expense == null)
+                return false;
 
-                    // update entity fields only once
-                    expense.Date = dto.Date;
-                    expense.SupportingNo = dto.SupportingNo;
-                    expense.Screenshot = dto.Screenshot;
-                    expense.Remarks = dto.Remarks;
-                    expense.Amount = dto.Amount;
-                    expense.PaymentMode = dto.PaymentMode;
-                    expense.Particulars = dto.Particulars;
-
-                    await _ExpenseRepository.UpdateExpense(expense);
-
-                    // return updated dto
-                    var result = new ExpenseDto
-                    {
-                        Date = expense.Date,
-                        SupportingNo = expense.SupportingNo,
-                        Screenshot = expense.Screenshot,
-                        Remarks = expense.Remarks,
-                        Amount = expense.Amount,
-                        PaymentMode = expense.PaymentMode,
-                        Particulars = expense.Particulars
-                    };
-
-                    return result;
-                }
-                catch (KeyNotFoundException ex)
-                {
-                    _logger.LogWarning(ex.Message);
-                    throw; // send to controller
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error updating expense");
-                    throw new ApplicationException("Unable to update expense", ex);
-                }
-            }
-
-            public async Task<ExpenseDto> DeleteExpense(Guid id)
-            {
-                var expense = await _ExpenseRepository.GetExpenseById(id);
-                if (expense == null)
-                {
-                    _logger.LogWarning("Expense not Found ");
-
-                }
-                await _ExpenseRepository.DeleteExpense(id);
-
-                return new ExpenseDto
-                {
-                    Date = expense.Date,
-                    SupportingNo = expense.SupportingNo,
-                    Screenshot = expense.Screenshot,
-                    Remarks = expense.Remarks,
-                    Amount = expense.Amount,
-                    PaymentMode = expense.PaymentMode,
-                    Particulars = expense.Particulars
-
-                };
-
-            }
+            await _expenseRepository.DeleteAsync(id);
+            return true;
         }
     }
-
+}

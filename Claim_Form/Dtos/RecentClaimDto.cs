@@ -1,12 +1,33 @@
 ﻿namespace Claim_Form.Dtos
 {
+    /// <summary>
+    /// Represents data required to create or update a recent claim.
+    /// </summary>
     public class RecentClaimDto
     {
-        public string Type { get; set; }
-        public DateTime Date { get; set; }
-        public string Purpose { get; set; }
-        public decimal Amount { get; set; }
-        public string Status { get; set; } = "Draft";
+        /// <summary>
+        /// Type of claim (e.g., Domestic, International).
+        /// </summary>
+        public string Type { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Date on which the claim was created or submitted.
+        /// </summary>
+        public DateTime Date { get; set; }
+
+        /// <summary>
+        /// Purpose or reason for the claim.
+        /// </summary>
+        public string Purpose { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Total claim amount.
+        /// </summary>
+        public decimal Amount { get; set; }
+
+        /// <summary>
+        /// Current status of the claim (Draft, Submitted, Approved, Rejected).
+        /// </summary>
+        public string Status { get; set; } = "Draft";
     }
 }

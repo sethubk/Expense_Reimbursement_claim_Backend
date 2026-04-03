@@ -2,14 +2,49 @@
 
 namespace Claim_Form.Repositories.Interface
 {
+    /// <summary>
+    /// Defines data access operations for recent claims.
+    /// </summary>
     public interface IRecentClaimRepository
     {
-        Task<RecentClaim> CreateClaimAsync(RecentClaim claim);
-        Task UpdateClaim(RecentClaim claim) => Task.CompletedTask;
-        Task<RecentClaim> GetClaim(Guid id);
-        Task<RecentClaim?> GetClaimByEmpIdAsync(Guid empId);
+        /// <summary>
+        /// Creates a new claim.
+        /// </summary>
+        /// <param name="claim">Claim entity.</param>
+        /// <returns>Created claim.</returns>
+        Task<RecentClaim> CreateAsync(RecentClaim claim);
 
-        Task<List<RecentClaim?>> GetClaimByEmpCode(string EmpCode);
-        Task DeleteDraft(string EmpCode);
+        /// <summary>
+        /// Updates an existing claim.
+        /// </summary>
+        /// <param name="claim">Claim entity.</param>
+        Task UpdateAsync(RecentClaim claim);
+
+        /// <summary>
+        /// Retrieves a claim by its identifier.
+        /// </summary>
+        /// <param name="claimId">Claim identifier.</param>
+        /// <returns>Claim if found; otherwise null.</returns>
+        Task<RecentClaim?> GetByIdAsync(Guid claimId);
+
+        /// <summary>
+        /// Retrieves all claims for a specific employee by employee identifier.
+        /// </summary>
+        /// <param name="empId">Employee identifier.</param>
+        /// <returns>List of claims.</returns>
+        Task<List<RecentClaim>> GetByEmployeeIdAsync(Guid empId);
+
+        /// <summary>
+        /// Retrieves all claims for a specific employee by employee code.
+        /// </summary>
+        /// <param name="empCode">Employee code.</param>
+        /// <returns>List of claims.</returns>
+        Task<List<RecentClaim>> GetByEmployeeCodeAsync(string empCode);
+
+        /// <summary>
+        /// Deletes draft claims for a specific employee.
+        /// </summary>
+        /// <param name="empCode">Employee code.</param>
+        Task DeleteDraftAsync(string empCode);
     }
 }

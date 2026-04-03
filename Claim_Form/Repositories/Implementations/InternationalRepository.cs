@@ -5,31 +5,59 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Claim_Form.Repositories.Implementations
 {
-    public class InternationalRepository:IInternationalRepository
+    /// <summary>
+    /// Repository implementation for international expense data operations.
+    /// </summary>
+    public class InternationalRepository : IInternationalRepository
     {
         private readonly AppDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InternationalRepository"/> class.
+        /// </summary>
+        /// <param name="context">Application database context.</param>
         public InternationalRepository(AppDbContext context)
         {
             _context = context;
         }
-        public async Task CreateBulkAsync(List<International> expenses)
+
+        /// <summary>
+        /// Adds multiple international expense entries in a single operation.
+        /// </summary>
+        /// <param name="expenses">International expense entities.</param>
+        public async Task AddBulkAsync(IEnumerable<International> expenses)
         {
             await _context.Internationals.AddRangeAsync(expenses);
             await _context.SaveChangesAsync();
         }
-        public async Task<International> GetInternationalExpenseById(Guid id)
+
+        /// <summary>
+        /// Retrieves an international expense by its identifier.
+        /// </summary>
+        /// <param name="id">International expense identifier.</param>
+        /// <returns>International expense if found; otherwise null.</returns>
+        public async Task<International?> GetByIdAsync(Guid id)
         {
-            return await _context.Internationals.FirstOrDefaultAsync(e => e.InternationalId == id);
+            return await _context.Internationals
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
         }
-        public async Task UpdateInternationalExpense(International expense)
+
+        /// <summary>
+        /// Updates an existing international expense entry.
+        /// </summary>
+        /// <param name="expense">International expense entity.</param>
+        public async Task UpdateAsync(International expense)
         {
             _context.Internationals.Update(expense);
             await _context.SaveChangesAsync();
-
         }
 
-        public async Task DeleteInternationalExpense(Guid id)
+        /// <summary>
+        /// Deletes an international expense by its identifier.
+        /// </summary>
+        /// <param name="id">International expense identifier.</param>
+        public async Task DeleteAsync(Guid id)
         {
             var expense = await _context.Internationals.FindAsync(id);
 

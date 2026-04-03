@@ -1,15 +1,42 @@
 ﻿using Claim_Form.Dtos;
-using Claim_Form.Entities;
 
 namespace Claim_Form.Services.Interface
 {
+    /// <summary>
+    /// Defines business operations related to expenses.
+    /// </summary>
     public interface IExpenseService
     {
-        Task<ExpenseDto> AddExpense(Guid claimid, ExpenseDto dto);
-   
+        /// <summary>
+        /// Creates multiple expense entries for a given claim.
+        /// </summary>
+        /// <param name="claimId">Claim identifier.</param>
+        /// <param name="entries">Expense entry details.</param>
+        /// <returns>Created expenses.</returns>
+        Task<IEnumerable<ExpenseDto>> CreateBulkAsync(
+            Guid claimId,
+            List<ExpenseEntryDto> entries);
+
+        /// <summary>
+        /// Retrieves an expense by its identifier.
+        /// </summary>
+        /// <param name="id">Expense identifier.</param>
+        /// <returns>Expense details if found; otherwise null.</returns>
         Task<ExpenseDto?> GetExpenseAsync(Guid id);
-        Task<ExpenseDto> UpdateExpense(Guid id, ExpenseDto dto);
-        Task<ExpenseDto> DeleteExpense(Guid id);
-        Task<IEnumerable<ExpenseDto>> CreateBulkAsync(Guid claimId, List<ExpenseEntryDto> entries);
+
+        /// <summary>
+        /// Updates an existing expense.
+        /// </summary>
+        /// <param name="id">Expense identifier.</param>
+        /// <param name="dto">Updated expense details.</param>
+        /// <returns>Updated expense details if found; otherwise null.</returns>
+        Task<ExpenseDto?> UpdateExpenseAsync(Guid id, ExpenseDto dto);
+
+        /// <summary>
+        /// Deletes an expense by its identifier.
+        /// </summary>
+        /// <param name="id">Expense identifier.</param>
+        /// <returns>True if deleted; false if not found.</returns>
+        Task<bool> DeleteExpenseAsync(Guid id);
     }
 }

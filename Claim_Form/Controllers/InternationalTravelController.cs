@@ -5,69 +5,97 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Claim_Form.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class InternationalTravelController : ControllerBase
     {
         private readonly IInternationalTravelService _internationalTravelService;
 
-        public InternationalTravelController(IInternationalTravelService internationalTravelService)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InternationalTravelController"/>.
+        /// </summary>
+        /// <param name="internationalTravelService">International travel service.</param>
+        public InternationalTravelController(
+            IInternationalTravelService internationalTravelService)
         {
             _internationalTravelService = internationalTravelService;
         }
 
-
-        // <summary>
-        // Creates a new TravelDetails record linked to a ClaimID
-        // </summary>
-        // <param name="claimId">cretae the travel details , like start and ens date od travel.</param>
-        [HttpPost("{claimId}")]
-        [SwaggerResponse(200, "Success")]
-        [SwaggerResponse(400, "Bad Request")]
-        [SwaggerResponse(404, "Not Found")]
-        [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> AddTravelDetails(Guid claimId,[FromBody] TravelDetailsDtos travelDetailsDtos)
+        /// <summary>
+        /// Creates travel details linked to a specific claim.
+        /// </summary>
+        /// <param name="Id">Claim identifier.</param>
+        /// <param name="travelDetailsDto">
+        /// Travel details including start date and end date.
+        /// </param>
+        /// <returns>Created travel details.</returns>
+        [HttpPost("{id}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Travel details created successfully.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Claim not found.")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
+        public async Task<IActionResult> AddTravelDetails(
+            [FromRoute] Guid Id,
+            [FromBody] TravelDetailsDto travelDetailsDto)
         {
+            if (Id == Guid.Empty)
+                return BadRequest("Claim id is required.");
 
-            if(travelDetailsDtos == null)
-            return BadRequest("Request body cannot be empty.");
+            if (travelDetailsDto == null)
+                return BadRequest("Request body cannot be empty.");
 
             try
             {
-                var created= await _internationalTravelService.AddTravelDetails(claimId, travelDetailsDtos);
+                var created = await _internationalTravelService
+                    .AddTravelDetailsAsync(Id, travelDetailsDto);
+
+                if (created == null)
+                    return NotFound($"No claim found with id '{Id}'.");
 
                 return Ok(created);
-
             }
-            catch (Exception ex)
+            catch
             {
-               return NotFound($"No claim found with ID = {claimId}");
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while creating travel details.");
             }
-
         }
-
 
         /// <summary>
-        /// Get travel details TravelDetails record linked to a ClaimID
+        /// Retrieves travel details linked to a specific claim.
         /// </summary>
-        /// <param name="claimId" get the travel details , like start and ens date od travel.</param>
-        [HttpGet("{claimId}")]
-        [SwaggerResponse(200, "Success")]
-        [SwaggerResponse(400, "Bad Request")]
-        [SwaggerResponse(404, "Not Found")]
-        [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> GetTravelByClaimId(Guid claimId)
+        /// <param name="claimId">Claim identifier.</param>
+        /// <returns>Travel details associated with the claim.</returns>
+        [HttpGet("{claimId:guid}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Travel details retrieved successfully.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid claim id.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Travel details not found.")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
+        public async Task<IActionResult> GetTravelByClaimId(
+            [FromRoute] Guid claimId)
         {
-            var result = await _internationalTravelService.GetTravelByClaimId(claimId);
+            if (claimId == Guid.Empty)
+                return BadRequest("Claim id is required.");
 
-            if (result == null)
+            try
             {
-                return NotFound(new { message = "No travel details found for this claim." });
+                var result = await _internationalTravelService
+                    .GetTravelByClaimIdAsync(claimId);
+
+                if (result == null)
+                {
+                    return NotFound("No travel details found for this claim.");
+                }
+
+                return Ok(result);
             }
-
-            return Ok(result);
+            catch
+            {
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while retrieving travel details.");
+            }
         }
-
-
     }
 }

@@ -1,9 +1,10 @@
 ﻿namespace Claim_Form.Dtos
 {
     /// <summary>
-    /// Represents employee information along with related claims.
+    /// Represents employee information returned after a successful login
+    /// or employee lookup operation.
     /// </summary>
-    public class EmpWithClaimDto
+    public class EmployeeResponseDto
     {
         /// <summary>
         /// Unique employee code.
@@ -16,14 +17,19 @@
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Employee email address.
-        /// </summary>
-        public string Email { get; set; } = string.Empty;
-
-        /// <summary>
         /// Employee department.
         /// </summary>
         public string Department { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Employee role (e.g., Admin, User, Manager).
+        /// </summary>
+        public string Role { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Employee email address.
+        /// </summary>
+        public string Email { get; set; } = string.Empty;
 
         /// <summary>
         /// Vendor or vendor cost reference.
@@ -31,8 +37,8 @@
         public string VendorCost { get; set; } = string.Empty;
 
         /// <summary>
-        /// List of recent claims associated with the employee.
+        /// Cost center associated with the employee.
         /// </summary>
-        public List<RecentClaimDto> RecentClaims { get; set; } = new();
+        public string CostCenter { get; set; } = string.Empty;
     }
 }
