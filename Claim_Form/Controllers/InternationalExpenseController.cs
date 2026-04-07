@@ -32,10 +32,10 @@ namespace Claim_Form.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateInternationalExpense(
-            [FromRoute] Guid Id,
+            [FromRoute] Guid ClaimId,
             [FromBody] List<InternationalDto> entries)
         {
-            if (Id == Guid.Empty)
+            if (ClaimId == Guid.Empty)
                 return BadRequest("Claim id is required.");
 
             if (entries == null || entries.Count == 0)
@@ -43,10 +43,10 @@ namespace Claim_Form.Controllers
 
             try
             {
-                var result = await _internationalService.CreateInternationalExpense(Id, entries);
+                var result = await _internationalService.CreateInternationalExpense(ClaimId, entries);
 
                 if (result == null)
-                    return NotFound($"No claim found with id '{Id}'.");
+                    return NotFound($"No claim found with id '{ClaimId}'.");
 
                 return Ok(result);
             }
