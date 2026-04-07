@@ -30,7 +30,7 @@ namespace Claim_Form.Controllers
         /// </param>
         /// <returns>Created travel details.</returns>
         ///  POST api/InternationalTravel/ClaimID/internationalTravel
-        [HttpPost("{claimId}/internationalTravel")]
+        [HttpPost("{claimId}/InternationalTravel")]
         [SwaggerResponse(StatusCodes.Status200OK, "Travel details created successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Claim not found.")]
