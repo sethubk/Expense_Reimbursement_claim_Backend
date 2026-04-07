@@ -25,7 +25,7 @@ namespace Claim_Form.Repositories.Implementations
         /// Adds multiple international expense entries in a single operation.
         /// </summary>
         /// <param name="expenses">International expense entities.</param>
-        public async Task AddBulkAsync(IEnumerable<International> expenses)
+        public async Task CreateInternationalExpenseAsync(IEnumerable<International> expenses)
         {
             await _context.Internationals.AddRangeAsync(expenses);
             await _context.SaveChangesAsync();

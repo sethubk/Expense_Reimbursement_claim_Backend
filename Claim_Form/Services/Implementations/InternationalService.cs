@@ -1,4 +1,5 @@
-﻿using Claim_Form.Dtos;
+﻿using AutoMapper;
+using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
@@ -13,6 +14,7 @@ namespace Claim_Form.Services.Implementations
         private readonly IInternationalRepository _internationalRepository;
         private readonly IRecentClaimRepository _recentClaimRepository;
         private readonly IInternationalTravelRepository _internationalTravelRepository;
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InternationalService"/> class.
@@ -20,17 +22,19 @@ namespace Claim_Form.Services.Implementations
         public InternationalService(
             IInternationalRepository internationalRepository,
             IRecentClaimRepository recentClaimRepository,
-            IInternationalTravelRepository internationalTravelRepository)
+            IInternationalTravelRepository internationalTravelRepository,
+            IMapper mapper)
         {
             _internationalRepository = internationalRepository;
             _recentClaimRepository = recentClaimRepository;
             _internationalTravelRepository = internationalTravelRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
         /// Creates multiple international expenses for a given claim.
         /// </summary>
-        public async Task<IEnumerable<InternationalDto>> CreateBulkAsync(
+        public async Task<IEnumerable<InternationalDto>> CreateInternationalExpense(
             Guid claimId,
             List<InternationalDto> entries)
         {
@@ -43,7 +47,7 @@ namespace Claim_Form.Services.Implementations
 
             var expenses = entries.Select(e => new International
             {
-                TravelId = travel.Id,
+                TravelId = travel.TravelId,
                 Date = e.Date,
                 SupportingNo = e.SupportingNo,
                 Particulars = e.Particulars,
@@ -54,8 +58,7 @@ namespace Claim_Form.Services.Implementations
                 Remarks = e.Remarks,
                 Screenshot = e.Screenshot
             }).ToList();
-
-            await _internationalRepository.AddBulkAsync(expenses);
+            await _internationalRepository.CreateInternationalExpenseAsync(expenses);
 
             // 🔹 Calculate reimbursement
             decimal totalExpense = expenses.Sum(e => e.ConvertedAmount);
@@ -77,21 +80,10 @@ namespace Claim_Form.Services.Implementations
                 reimbursementStatus = "Settled";
             }
 
-            await _internationalTravelRepository
-                .UpdateReimbursementStatusAsync(travel.Id, reimbursementStatus);
+            var created= await _internationalTravelRepository
+                .UpdateReimbursementStatusAsync(travel.TravelId, reimbursementStatus);
 
-            return expenses.Select(e => new InternationalDto
-            {
-                Date = e.Date,
-                SupportingNo = e.SupportingNo,
-                Particulars = e.Particulars,
-                PaymentMode = e.PaymentMode,
-                CurrencyType = e.CurrencyType,
-                Amount = e.Amount,
-                ConvertedAmount = e.ConvertedAmount,
-                Remarks = e.Remarks,
-                Screenshot = e.Screenshot
-            });
+            return _mapper.Map<List<InternationalDto>>(created);
         }
 
         /// <summary>
@@ -104,18 +96,7 @@ namespace Claim_Form.Services.Implementations
             if (model == null)
                 return null;
 
-            return new InternationalDto
-            {
-                Date = model.Date,
-                SupportingNo = model.SupportingNo,
-                Particulars = model.Particulars,
-                PaymentMode = model.PaymentMode,
-                CurrencyType = model.CurrencyType,
-                Amount = model.Amount,
-                ConvertedAmount = model.ConvertedAmount,
-                Remarks = model.Remarks,
-                Screenshot = model.Screenshot
-            };
+            return _mapper.Map<InternationalDto>(model);
         }
 
         /// <summary>
@@ -140,7 +121,7 @@ namespace Claim_Form.Services.Implementations
             model.Remarks = dto.Remarks;
             model.Screenshot = dto.Screenshot;
 
-            await _internationalRepository.UpdateAsync(model);
+          await _internationalRepository.UpdateAsync(model);
 
             return dto;
         }

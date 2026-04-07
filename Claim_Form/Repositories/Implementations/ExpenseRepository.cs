@@ -72,7 +72,7 @@ namespace Claim_Form.Repositories.Implementations
         /// Adds multiple expense entries in a single operation.
         /// </summary>
         /// <param name="expenses">List of expenses.</param>
-        public async Task AddBulkAsync(IEnumerable<Expense> expenses)
+        public async Task AddExpenseAsync(IEnumerable<Expense> expenses)
         {
             await _context.Expenses.AddRangeAsync(expenses);
             await _context.SaveChangesAsync();

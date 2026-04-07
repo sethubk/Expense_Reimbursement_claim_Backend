@@ -36,6 +36,6 @@ namespace Claim_Form.Repositories.Interface
         /// Adds multiple expense entries in a single operation.
         /// </summary>
         /// <param name="expenses">Collection of expense entities.</param>
-        Task AddBulkAsync(IEnumerable<Expense> expenses);
+        Task AddExpenseAsync(IEnumerable<Expense> expenses);
     }
 }

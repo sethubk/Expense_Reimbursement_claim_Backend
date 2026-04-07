@@ -12,6 +12,7 @@ namespace Claim_Form.Entities
         /// <summary>
         /// Unique identifier of the employee.
         /// </summary>
+   
         public Guid Id { get; set; }
 
         /// <summary>

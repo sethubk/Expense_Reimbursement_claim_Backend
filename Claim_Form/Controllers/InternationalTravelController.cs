@@ -24,33 +24,34 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Creates travel details linked to a specific claim.
         /// </summary>
-        /// <param name="Id">Claim identifier.</param>
-        /// <param name="travelDetailsDto">
+        /// <param name="claimId">Claim identifier.</param>
+        /// <param name="input">
         /// Travel details including start date and end date.
         /// </param>
         /// <returns>Created travel details.</returns>
-        [HttpPost("{id}")]
+        ///  POST api/InternationalTravel/ClaimID/internationalTravel
+        [HttpPost("{claimId}/internationalTravel")]
         [SwaggerResponse(StatusCodes.Status200OK, "Travel details created successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Claim not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
         public async Task<IActionResult> AddTravelDetails(
-            [FromRoute] Guid Id,
-            [FromBody] TravelDetailsDto travelDetailsDto)
+            [FromRoute] Guid claimId,
+            [FromBody] TravelDetailsDto input)
         {
-            if (Id == Guid.Empty)
+            if (claimId == Guid.Empty)
                 return BadRequest("Claim id is required.");
 
-            if (travelDetailsDto == null)
+            if (input == null)
                 return BadRequest("Request body cannot be empty.");
 
             try
             {
                 var created = await _internationalTravelService
-                    .AddTravelDetailsAsync(Id, travelDetailsDto);
+                    .AddTravelDetailsAsync(claimId, input);
 
                 if (created == null)
-                    return NotFound($"No claim found with id '{Id}'.");
+                    return NotFound($"No claim found with id '{claimId}'.");
 
                 return Ok(created);
             }
@@ -67,7 +68,8 @@ namespace Claim_Form.Controllers
         /// </summary>
         /// <param name="claimId">Claim identifier.</param>
         /// <returns>Travel details associated with the claim.</returns>
-        [HttpGet("{claimId:guid}")]
+        ///  get api/Internationaltrvel/ClaimID/internationaltrvel
+        [HttpGet("{claimId}/internationalTravel")]
         [SwaggerResponse(StatusCodes.Status200OK, "Travel details retrieved successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid claim id.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Travel details not found.")]

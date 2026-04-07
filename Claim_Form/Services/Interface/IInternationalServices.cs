@@ -13,7 +13,7 @@ namespace Claim_Form.Services.Interface
         /// <param name="claimId">Claim identifier.</param>
         /// <param name="entries">International expense details.</param>
         /// <returns>Created international expenses.</returns>
-        Task<IEnumerable<InternationalDto>> CreateBulkAsync(
+        Task<IEnumerable<InternationalDto>> CreateInternationalExpense(
             Guid claimId,
             List<InternationalDto> entries);
 

@@ -1,4 +1,5 @@
-﻿using Claim_Form.Dtos;
+﻿using AutoMapper;
+using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
@@ -12,16 +13,19 @@ namespace Claim_Form.Services.Implementations
     {
         private readonly IInternationalTravelRepository _travelRepository;
         private readonly IRecentClaimRepository _claimRepository;
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InternationalTravelService"/> class.
         /// </summary>
         public InternationalTravelService(
             IInternationalTravelRepository travelRepository,
-            IRecentClaimRepository claimRepository)
+            IRecentClaimRepository claimRepository,
+            IMapper mapper)
         {
             _travelRepository = travelRepository;
             _claimRepository = claimRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -59,7 +63,7 @@ namespace Claim_Form.Services.Implementations
                         TotalLoadedAmount = c.TotalLoadedAmount
                     }).ToList()
                 };
-
+               
                 await _travelRepository.AddAsync(travel);
             }
             else
@@ -79,7 +83,7 @@ namespace Claim_Form.Services.Implementations
                         PaymentType = entry.PaymentType,
                         InrRate = entry.InrRate,
                         TotalLoadedAmount = entry.TotalLoadedAmount,
-                        TravelId = travel.Id
+                       
                     });
                 }
 
@@ -87,21 +91,22 @@ namespace Claim_Form.Services.Implementations
             }
 
             // ✅ Return updated DTO
-            return new TravelDetailsDto
-            {
-                CurrencyType = travel.CurrencyType,
-                TravelStartDate = travel.TravelStartDate,
-                TravelEndDate = travel.TravelEndDate,
-                TotalDays = travel.TotalDays,
-                AdvanceAmount = travel.AdvanceAmount,
-                CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
-                {
-                    LoadedDate = c.LoadedDate,
-                    PaymentType = c.PaymentType,
-                    InrRate = c.InrRate,
-                    TotalLoadedAmount = c.TotalLoadedAmount
-                }).ToList()
-            };
+            //return new TravelDetailsDto
+            //{
+            //    CurrencyType = travel.CurrencyType,
+            //    TravelStartDate = travel.TravelStartDate,
+            //    TravelEndDate = travel.TravelEndDate,
+            //    TotalDays = travel.TotalDays,
+            //    AdvanceAmount = travel.AdvanceAmount,
+            //    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
+            //    {
+            //        LoadedDate = c.LoadedDate,
+            //        PaymentType = c.PaymentType,
+            //        InrRate = c.InrRate,
+            //        TotalLoadedAmount = c.TotalLoadedAmount
+            //    }).ToList()
+            //};
+            return _mapper.Map<TravelDetailsDto>(travel);
         }
 
         /// <summary>
@@ -114,21 +119,23 @@ namespace Claim_Form.Services.Implementations
             if (travel == null)
                 return null;
 
-            return new TravelDetailsDto
-            {
-                CurrencyType = travel.CurrencyType,
-                TravelStartDate = travel.TravelStartDate,
-                TravelEndDate = travel.TravelEndDate,
-                TotalDays = travel.TotalDays,
-                AdvanceAmount = travel.AdvanceAmount,
-                CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
-                {
-                    LoadedDate = c.LoadedDate,
-                    PaymentType = c.PaymentType,
-                    InrRate = c.InrRate,
-                    TotalLoadedAmount = c.TotalLoadedAmount
-                }).ToList()
-            };
+            //return new TravelDetailsDto
+            //{
+            //    CurrencyType = travel.CurrencyType,
+            //    TravelStartDate = travel.TravelStartDate,
+            //    TravelEndDate = travel.TravelEndDate,
+            //    TotalDays = travel.TotalDays,
+            //    AdvanceAmount = travel.AdvanceAmount,
+            //    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
+            //    {
+            //        LoadedDate = c.LoadedDate,
+            //        PaymentType = c.PaymentType,
+            //        InrRate = c.InrRate,
+            //        TotalLoadedAmount = c.TotalLoadedAmount
+            //    }).ToList()
+            //};
+            return _mapper.Map<TravelDetailsDto>(travel);
+
         }
     }
 }

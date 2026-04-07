@@ -13,7 +13,7 @@ namespace Claim_Form.Services.Interface
         /// <param name="claimId">Claim identifier.</param>
         /// <param name="entries">Expense entry details.</param>
         /// <returns>Created expenses.</returns>
-        Task<IEnumerable<ExpenseDto>> CreateBulkAsync(
+        Task<IEnumerable<ExpenseDto>> CreateExpenseAsync(
             Guid claimId,
             List<ExpenseEntryDto> entries);
 

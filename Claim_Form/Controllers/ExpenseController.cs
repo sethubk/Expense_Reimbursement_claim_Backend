@@ -23,19 +23,20 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Creates multiple expense entries under a single claim.
         /// </summary>
-        /// <param name="Id">Claim identifier.</param>
+        /// <param name="claimId">Claim identifier.</param>
         /// <param name="entries">List of expense entries.</param>
         /// <returns>Created expense entries.</returns>
-        [HttpPost("{Id}")]
+        /// // POST api/recentClaim/ID/Expense
+        [HttpPost("{claimId}/Expense")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expenses created successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input data.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Claim not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
         public async Task<IActionResult> CreateExpense(
-            [FromRoute] Guid Id,
+            [FromRoute] Guid claimId,
             [FromBody] List<ExpenseEntryDto> entries)
         {
-            if (Id == Guid.Empty)
+            if (claimId == Guid.Empty)
                 return BadRequest("Claim id is required.");
 
             if (entries == null || entries.Count == 0)
@@ -43,10 +44,10 @@ namespace Claim_Form.Controllers
 
             try
             {
-                var result = await _expenseService.CreateBulkAsync(Id, entries);
+                var result = await _expenseService.CreateExpenseAsync(claimId, entries);
 
                 if (result == null)
-                    return NotFound($"No claim found with id '{Id}'.");
+                    return NotFound($"No claim found with id '{claimId}'.");
 
                 return Ok(result);
             }
@@ -60,24 +61,25 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Retrieves an expense by its unique identifier.
         /// </summary>
-        /// <param name="id">Expense identifier.</param>
+        /// <param name="claimid">Expense identifier.</param>
         /// <returns>Expense details.</returns>
-        [HttpGet("{id}")]
+        ///  // get api/recentClaim/ID/Expense
+        [HttpGet("{claimId}/Expense")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expense retrieved successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid expense id.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
-        public async Task<IActionResult> GetExpense([FromRoute] Guid id)
+        public async Task<IActionResult> GetExpense([FromRoute] Guid claimid)
         {
-            if (id == Guid.Empty)
+            if (claimid == Guid.Empty)
                 return BadRequest("Invalid expense id.");
 
             try
             {
-                var expense = await _expenseService.GetExpenseAsync(id);
+                var expense = await _expenseService.GetExpenseAsync(claimid);
 
                 if (expense == null)
-                    return NotFound($"No expense found with id '{id}'.");
+                    return NotFound($"No expense found with id '{claimid}'.");
 
                 return Ok(expense);
             }
@@ -91,30 +93,31 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Updates an existing expense.
         /// </summary>
-        /// <param name="id">Expense identifier.</param>
-        /// <param name="dto">Updated expense data.</param>
-        /// <returns>Updated expense.</returns>
-        [HttpPut("{id}")]
+        /// <param name="claimid">Expense identifier.</param>
+        /// <param name="input">Updated expense data.</param>
+        /// <returns>Updated expense.</returns>\
+        ///  // Put api/recentClaim/ID/Expense
+        [HttpPut("{claimId}/Expense")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expense updated successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
         public async Task<IActionResult> UpdateExpense(
-            [FromRoute] Guid id,
-            [FromBody] ExpenseDto dto)
+            [FromRoute] Guid claimid,
+            [FromBody] ExpenseDto input)
         {
-            if (id == Guid.Empty)
+            if (claimid == Guid.Empty)
                 return BadRequest("Invalid expense id.");
 
-            if (dto == null)
+            if (input == null)
                 return BadRequest("Request body is required.");
 
             try
             {
-                var updatedExpense = await _expenseService.UpdateExpenseAsync(id, dto);
+                var updatedExpense = await _expenseService.UpdateExpenseAsync(claimid, input);
 
                 if (updatedExpense == null)
-                    return NotFound($"No expense found with id '{id}'.");
+                    return NotFound($"No expense found with id '{claimid}'.");
 
                 return Ok(updatedExpense);
             }
@@ -128,24 +131,25 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Deletes an expense by its unique identifier.
         /// </summary>
-        /// <param name="id">Expense identifier.</param>
+        /// <param name="claimid">Expense identifier.</param>
         /// <returns>No content.</returns>
-        [HttpDelete("{id}")]
+        ///  // Delete api/recentClaim/ID/Expense
+        [HttpDelete("{claimId}/Expense")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Expense deleted successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid expense id.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
-        public async Task<IActionResult> DeleteExpense([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteExpense([FromRoute] Guid claimid)
         {
-            if (id == Guid.Empty)
+            if (claimid == Guid.Empty)
                 return BadRequest("Invalid expense id.");
 
             try
             {
-                var deleted = await _expenseService.DeleteExpenseAsync(id);
+                var deleted = await _expenseService.DeleteExpenseAsync(claimid);
 
                 if (deleted == null)
-                    return NotFound($"No expense found with id '{id}'.");
+                    return NotFound($"No expense found with id '{claimid}'.");
 
                 return NoContent();
             }

@@ -54,7 +54,7 @@ namespace Claim_Form.Repositories.Implementations
             string status)
         {
             var travelDetails = await _context.TravelDetails
-                .FirstOrDefaultAsync(t => t.Id == travelId);
+                .FirstOrDefaultAsync(t => t.TravelId == travelId);
 
             if (travelDetails == null)
                 return null;
@@ -78,7 +78,7 @@ namespace Claim_Form.Repositories.Implementations
                 .Include(t => t.CardCashEntries)
                 .Include(t => t.Internationals)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.RecentClaimId == claimId);
+                .FirstOrDefaultAsync(t => t.RecentClaim.RecentClaimId == claimId);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Claim_Form.Repositories.Implementations
         {
             return await _context.TravelDetails
                 .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.Id == travelId);
+                .FirstOrDefaultAsync(t => t.TravelId == travelId);
         }
     }
 }

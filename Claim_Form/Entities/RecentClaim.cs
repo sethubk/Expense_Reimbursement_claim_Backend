@@ -8,7 +8,7 @@
         /// <summary>
         /// Unique identifier for the claim.
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid RecentClaimId { get; set; }
 
         /// <summary>
         /// Type of claim (e.g., Domestic, International).

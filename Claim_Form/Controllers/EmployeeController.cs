@@ -23,7 +23,7 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Authenticates an employee using email and password.
         /// </summary>
-        /// <param name="dto">Login payload containing employee email and password.</param>
+        /// <param name="input">Login payload containing employee email and password.</param>
         /// <returns>
         /// Returns employee details along with JWT token if authentication is successful.
         /// </returns>
@@ -31,21 +31,22 @@ namespace Claim_Form.Controllers
         /// <response code="400">Invalid request payload.</response>
         /// <response code="401">Invalid email or password.</response>
         /// <response code="500">Internal server error.</response>
+         // post api/Employee
         [HttpPost]
         [SwaggerResponse(200, "Success", typeof(EmployeeResponseDto))]
         [SwaggerResponse(400, "Bad Request")]
         [SwaggerResponse(401, "Unauthorized")]
         [SwaggerResponse(500, "Internal Server Error")]
-        public async Task<IActionResult> Login([FromBody] EmployeeLoginDto dto)
+        public async Task<IActionResult> Login([FromBody] EmployeeLoginDto input)
         {
-            if (dto == null)
+            if (input == null)
             {
                 return BadRequest("Login details are required.");
             }
 
             try
             {
-                var response = await _employeeService.GetEmployeeAsync(dto);
+                var response = await _employeeService.GetEmployeeAsync(input);
 
                 if (response == null)
                 {
@@ -71,8 +72,9 @@ namespace Claim_Form.Controllers
         /// <response code="400">Employee code is invalid.</response>
         /// <response code="404">No claims found for the given employee code.</response>
         /// <response code="500">Internal server error.</response>
+        // Get api/Employee/Empcode
         [HttpGet("{empCode}")]
-        [SwaggerResponse(200, "Success")]
+        [SwaggerResponse(200, "Success",typeof(EmpWithClaimDto))]
         [SwaggerResponse(400, "Bad Request")]
         [SwaggerResponse(404, "Not Found")]
         [SwaggerResponse(500, "Internal Server Error")]

@@ -1,4 +1,5 @@
-﻿using Claim_Form.Dtos;
+﻿using AutoMapper;
+using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
@@ -12,13 +13,16 @@ namespace Claim_Form.Services.Implementations
     {
         private readonly IRecentClaimRepository _claimRepository;
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly IMapper _mapper;
 
         public RecentClaimService(
             IRecentClaimRepository claimRepository,
-            IEmployeeRepository employeeRepository)
+            IEmployeeRepository employeeRepository,
+            IMapper mapper)
         {
             _claimRepository = claimRepository;
             _employeeRepository = employeeRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -45,15 +49,7 @@ namespace Claim_Form.Services.Implementations
 
             var created = await _claimRepository.CreateAsync(claim);
 
-            return new RecentClaimResponseDto
-            {
-                RecentClaimId = created.Id,
-                Type = created.Type,
-                Date = created.Date,
-                Purpose = created.Purpose,
-                Status = created.Status,
-                Amount = created.Amount
-            };
+            return _mapper.Map<RecentClaimResponseDto>(created);
         }
 
         /// <summary>
@@ -78,14 +74,15 @@ namespace Claim_Form.Services.Implementations
 
             await _claimRepository.UpdateAsync(claim);
 
-            return new RecentClaimDto
-            {
-                Type = claim.Type,
-                Date = claim.Date,
-                Purpose = claim.Purpose,
-                Status = claim.Status,
-                Amount = claim.Amount
-            };
+            //return new RecentClaimDto
+            //{
+            //    Type = claim.Type,
+            //    Date = claim.Date,
+            //    Purpose = claim.Purpose,
+            //    Status = claim.Status,
+            //    Amount = claim.Amount
+            //};
+            return _mapper.Map<RecentClaimDto>(claim);
         }
 
         /// <summary>
@@ -117,7 +114,7 @@ namespace Claim_Form.Services.Implementations
 
             return claims.Select(c => new RecentClaimResponseDto
             {
-                RecentClaimId = c.Id,
+                RecentClaimId = c.RecentClaimId,
                 Type = c.Type,
                 Date = c.Date,
                 Purpose = c.Purpose,
@@ -137,15 +134,8 @@ namespace Claim_Form.Services.Implementations
 
             var claims = await _claimRepository.GetByEmployeeCodeAsync(empCode);
 
-            return claims.Select(c => new RecentClaimResponseDto
-            {
-                RecentClaimId = c.Id,
-                Type = c.Type,
-                Date = c.Date,
-                Purpose = c.Purpose,
-                Status = c.Status,
-                Amount = c.Amount
-            }).ToList();
+            return _mapper.Map<List<RecentClaimResponseDto>>(claims);
+
         }
 
         /// <summary>

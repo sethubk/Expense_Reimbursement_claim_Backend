@@ -54,7 +54,7 @@ namespace Claim_Form.Repositories.Implementations
                 .Include(c => c.TravelDetails)
                 .Include(c => c.Expenses)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == claimId);
+                .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
         }
 
         /// <summary>

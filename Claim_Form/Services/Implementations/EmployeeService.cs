@@ -1,4 +1,5 @@
-﻿using Claim_Form.Dtos;
+﻿using AutoMapper;
+using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
@@ -16,16 +17,18 @@ namespace Claim_Form.Services.Implementations
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EmployeeService"/> class.
         /// </summary>
         public EmployeeService(
             IConfiguration configuration,
-            IEmployeeRepository employeeRepository)
+            IEmployeeRepository employeeRepository,IMapper mapper)
         {
             _configuration = configuration;
             _employeeRepository = employeeRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -46,16 +49,18 @@ namespace Claim_Form.Services.Implementations
 
             var token = GenerateJwtToken(employee);
 
-            return new EmployeeResponseDto
-            {
-                EmpCode = employee.EmpCode,
-                Name = employee.Name,
-                Department = employee.Department,
-                Role = employee.Role,
-                Email = employee.Email,
-                VendorCost = employee.VendorCost,
-                CostCenter = employee.CostCenter
-            };
+            //return new EmployeeResponseDto
+            //{
+            //    EmpCode = employee.EmpCode,
+            //    Name = employee.Name,
+            //    Department = employee.Department,
+            //    Role = employee.Role,
+            //    Email = employee.Email,
+            //    VendorCost = employee.VendorCost,
+            //    CostCenter = employee.CostCenter
+            //};
+           return _mapper.Map<EmployeeResponseDto>(employee);
+            
         }
 
         /// <summary>
@@ -71,24 +76,25 @@ namespace Claim_Form.Services.Implementations
             if (employee == null)
                 return null;
 
-            return new EmpWithClaimDto
-            {
-                EmpCode = employee.EmpCode,
-                Name = employee.Name,
-                Email = employee.Email,
-                Department = employee.Department,
-                VendorCost = employee.VendorCost,
-                RecentClaims = employee.RecentClaims
-                    .Select(c => new RecentClaimDto
-                    {
-                        Type = c.Type,
-                        Date = c.Date,
-                        Purpose = c.Purpose,
-                        Amount = c.Amount,
-                        Status = c.Status
-                    })
-                    .ToList()
-            };
+            //return new EmpWithClaimDto
+            //{
+            //    EmpCode = employee.EmpCode,
+            //    Name = employee.Name,
+            //    Email = employee.Email,
+            //    Department = employee.Department,
+            //    VendorCost = employee.VendorCost,
+            //    RecentClaims = employee.RecentClaims
+            //        .Select(c => new RecentClaimDto
+            //        {
+            //            Type = c.Type,
+            //            Date = c.Date,
+            //            Purpose = c.Purpose,
+            //            Amount = c.Amount,
+            //            Status = c.Status
+            //        })
+            //        .ToList()
+            //};
+            return _mapper.Map<EmpWithClaimDto>(employee);
         }
 
         /// <summary>

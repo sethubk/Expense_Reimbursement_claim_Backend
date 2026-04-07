@@ -11,7 +11,7 @@ namespace Claim_Form.Entities
         /// Unique identifier for the travel details record.
         /// </summary>
         [Key]
-        public Guid Id { get; set; }
+        public Guid TravelId { get; set; }
 
         /// <summary>
         /// Currency type used during travel (e.g., USD, EUR).

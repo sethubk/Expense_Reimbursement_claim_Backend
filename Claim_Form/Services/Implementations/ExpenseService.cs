@@ -1,4 +1,5 @@
-﻿using Claim_Form.Dtos;
+﻿using AutoMapper;
+using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
@@ -12,22 +13,24 @@ namespace Claim_Form.Services.Implementations
     {
         private readonly IExpenseRepository _expenseRepository;
         private readonly IRecentClaimRepository _recentClaimRepository;
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpenseService"/> class.
         /// </summary>
         public ExpenseService(
             IExpenseRepository expenseRepository,
-            IRecentClaimRepository recentClaimRepository)
+            IRecentClaimRepository recentClaimRepository,IMapper mapper)
         {
             _expenseRepository = expenseRepository;
             _recentClaimRepository = recentClaimRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
         /// Creates multiple expense entries for a claim.
         /// </summary>
-        public async Task<IEnumerable<ExpenseDto>> CreateBulkAsync(
+        public async Task<IEnumerable<ExpenseDto>> CreateExpenseAsync(
             Guid claimId,
             List<ExpenseEntryDto> entries)
         {
@@ -48,18 +51,19 @@ namespace Claim_Form.Services.Implementations
                 Screenshot = e.Screenshot ?? string.Empty
             }).ToList();
 
-            await _expenseRepository.AddBulkAsync(expenses);
+            await _expenseRepository.AddExpenseAsync(expenses);
 
-            return expenses.Select(e => new ExpenseDto
-            {
-                Date = e.Date,
-                SupportingNo = e.SupportingNo,
-                Particulars = e.Particulars,
-                PaymentMode = e.PaymentMode,
-                Amount = e.Amount,
-                Remarks = e.Remarks,
-                Screenshot = e.Screenshot
-            });
+            //return expenses.Select(e => new ExpenseDto
+            //{
+            //    Date = e.Date,
+            //    SupportingNo = e.SupportingNo,
+            //    Particulars = e.Particulars,
+            //    PaymentMode = e.PaymentMode,
+            //    Amount = e.Amount,
+            //    Remarks = e.Remarks,
+            //    Screenshot = e.Screenshot
+            //});
+            return _mapper.Map<List<ExpenseDto>>(expenses);
         }
 
         /// <summary>
@@ -72,16 +76,7 @@ namespace Claim_Form.Services.Implementations
             if (expense == null)
                 return null;
 
-            return new ExpenseDto
-            {
-                Date = expense.Date,
-                SupportingNo = expense.SupportingNo,
-                Particulars = expense.Particulars,
-                PaymentMode = expense.PaymentMode,
-                Amount = expense.Amount,
-                Remarks = expense.Remarks,
-                Screenshot = expense.Screenshot
-            };
+            return _mapper.Map<ExpenseDto>(expense);
         }
 
         /// <summary>

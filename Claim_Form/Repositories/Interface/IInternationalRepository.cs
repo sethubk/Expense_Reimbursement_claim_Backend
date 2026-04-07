@@ -30,6 +30,6 @@ namespace Claim_Form.Repositories.Interface
         /// Adds multiple international expense entries in a single operation.
         /// </summary>
         /// <param name="expenses">Collection of international expense entities.</param>
-        Task AddBulkAsync(IEnumerable<International> expenses);
+        Task CreateInternationalExpenseAsync(IEnumerable<International> expenses);
     }
 }
