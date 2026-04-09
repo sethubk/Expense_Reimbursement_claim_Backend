@@ -50,6 +50,17 @@ namespace Claim_Form.Mapping
 
             CreateMap<RecentClaim, RecentClaimResponseDto>();
             CreateMap<RecentClaim, RecentClaimDto>();
+
+
+
+            // DTO → Entity (Create / Update)
+            CreateMap<DomesticDto, Domestic>()
+                .ForMember(d => d.Id, o => o.Ignore())       // PK
+                .ForMember(d => d.TravelId, o => o.Ignore());
+
+            // Entity → DTO (Read)
+            CreateMap<Domestic, DomesticDto>();
+
         }
     }
 }

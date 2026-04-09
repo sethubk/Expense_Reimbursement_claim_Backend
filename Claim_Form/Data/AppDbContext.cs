@@ -47,6 +47,10 @@ namespace Claim_Form.Data
         /// </summary>
         public DbSet<CashInfo> CashInfos { get; set; }
 
+        /// <summary>
+        /// Domestic expenses table.
+        /// </summary>
+        public DbSet<Domestic> Domestic { get; set; }
         #endregion
 
         /// <summary>
@@ -91,6 +95,12 @@ namespace Claim_Form.Data
                 .WithOne(i => i.TravelDetails)
                 .HasForeignKey(i => i.TravelId)
                 .OnDelete(DeleteBehavior.Cascade);
+            // // TravelDetails → Domestic (One-to-Many)
+            modelBuilder.Entity<TravelDetails>()
+               .HasMany(td => td.Domestic)
+               .WithOne(i => i.TravelDetails)
+               .HasForeignKey(i => i.TravelId)
+               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
