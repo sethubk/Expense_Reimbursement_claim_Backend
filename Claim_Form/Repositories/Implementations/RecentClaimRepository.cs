@@ -67,6 +67,8 @@ namespace Claim_Form.Repositories.Implementations
                     .AsNoTracking()
                     .Include(c => c.Expenses)
                     .Include(c => c.TravelDetails)
+                    .ThenInclude(c => c.CardCashEntries)
+                    .Include(c => c.TravelDetails)
                         .ThenInclude(t => t.Internationals)
                     //.Include(c => c.TravelDetails)
                     //    .ThenInclude(t => t.Domestics)

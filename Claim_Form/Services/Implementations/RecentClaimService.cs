@@ -107,7 +107,6 @@ namespace Claim_Form.Services.Implementations
                 ClaimType = claim.Type
             };
 
-            // ✅ EXPENSE CLAIM
             if (claim.Type == "Expense")
             {
                 foreach (var e in claim.Expenses)
@@ -127,7 +126,6 @@ namespace Claim_Form.Services.Implementations
                 return response;
             }
 
-            // ✅ TRAVEL CLAIM
             if (claim.Type == "InternationalTravels" && claim.TravelDetails != null)
             {
                 response.TravelType = claim.Type;
@@ -153,7 +151,6 @@ namespace Claim_Form.Services.Implementations
                     });
                 }
 
-                // ✅ INTERNATIONAL EXPENSES
                 
                     foreach (var i in claim.TravelDetails.Internationals)
                     {
