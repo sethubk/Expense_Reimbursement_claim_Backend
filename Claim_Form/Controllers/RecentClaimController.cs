@@ -142,32 +142,32 @@ namespace Claim_Form.Controllers
         /// <param name="employeeCode">Employee code.</param>
         /// <returns>Employee claims.</returns>
         //  // get api/recentClaim/ID/Expense
-        [HttpGet("{employeeCode}/claim")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetClaimByEmpCode([FromRoute] string employeeCode)
-        {
-            if (string.IsNullOrWhiteSpace(employeeCode))
-                return BadRequest("Employee code is required.");
+        //[HttpGet("{employeeCode}/claim")]
+        //[SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        //[SwaggerResponse(StatusCodes.Status400BadRequest)]
+        //[SwaggerResponse(StatusCodes.Status404NotFound)]
+        //[SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> GetClaimByEmpCode([FromRoute] string employeeCode)
+        //{
+        //    if (string.IsNullOrWhiteSpace(employeeCode))
+        //        return BadRequest("Employee code is required.");
 
-            try
-            {
-                var result = await _recentClaimService.GetClaimByEmpCodeAsync(employeeCode);
+        //    try
+        //    {
+        //        var result = await _recentClaimService.GetClaimByEmpCodeAsync(employeeCode);
 
-                if (result == null)
-                    return NotFound("No claims found for this employee.");
+        //        if (result == null)
+        //            return NotFound("No claims found for this employee.");
 
-                return Ok(result);
-            }
-            catch
-            {
-                return StatusCode(
-                    StatusCodes.Status500InternalServerError,
-                    "An error occurred while retrieving claims.");
-            }
-        }
+        //        return Ok(result);
+        //    }
+        //    catch
+        //    {
+        //        return StatusCode(
+        //            StatusCodes.Status500InternalServerError,
+        //            "An error occurred while retrieving claims.");
+        //    }
+        //}
 
         /// <summary>
         /// Deletes draft claims for a specific employee.

@@ -1,4 +1,5 @@
 ﻿using Claim_Form.Data;
+using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -50,11 +51,30 @@ namespace Claim_Form.Repositories.Implementations
         /// <returns>Claim if found; otherwise null.</returns>
         public async Task<RecentClaim?> GetByIdAsync(Guid claimId)
         {
+
+            var claim = await _context.RecentClaims
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
+
+            if (claim == null)
+                return null;
+
+
+
+
+
             return await _context.RecentClaims
-                .Include(c => c.TravelDetails)
-                .Include(c => c.Expenses)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
+                    .AsNoTracking()
+                    .Include(c => c.Expenses)
+                    .Include(c => c.TravelDetails)
+                        .ThenInclude(t => t.Internationals)
+                    //.Include(c => c.TravelDetails)
+                    //    .ThenInclude(t => t.Domestics)
+                    .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
+
+
+
+
         }
 
         /// <summary>

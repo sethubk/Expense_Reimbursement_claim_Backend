@@ -33,6 +33,11 @@
         /// <summary>
         /// Cash or card entries associated with the travel.
         /// </summary>
+        /// 
+        /// <summary>
+        /// Reimbursement status (Pending, Settled, Rejected, etc.).
+        /// </summary>
+        public string ReimbursementStatus { get; set; } = string.Empty;
         public List<CashInfoDto> CardCashEntries { get; set; } = new();
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Azure;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using System.Security.Claims;
 
 namespace Claim_Form.Services.Implementations
 {
@@ -88,22 +90,93 @@ namespace Claim_Form.Services.Implementations
         /// <summary>
         /// Retrieves a claim by its identifier.
         /// </summary>
-        public async Task<RecentClaimDto?> GetClaimAsync(Guid id)
+        public async Task<ClaimDetailResponseDto?> GetClaimAsync(Guid claimId)
         {
-            var claim = await _claimRepository.GetByIdAsync(id);
+            var claim = await _claimRepository.GetByIdAsync(claimId);
 
             if (claim == null)
                 return null;
 
-            return new RecentClaimDto
+
+            if (claim == null)
+                return null;
+
+            var response = new ClaimDetailResponseDto
             {
-                Type = claim.Type,
-                Date = claim.Date,
-                Purpose = claim.Purpose,
-                Status = claim.Status,
-                Amount = claim.Amount
+                RecentClaimId = claim.RecentClaimId,
+                ClaimType = claim.Type
             };
+
+            // ✅ EXPENSE CLAIM
+            if (claim.Type == "Expense")
+            {
+                foreach (var e in claim.Expenses)
+                {
+                    response.Expenses.Add(new ExpenseDto
+                    {
+                        Date = e.Date,
+                        SupportingNo = e.SupportingNo,
+                        Particulars = e.Particulars,
+                        PaymentMode = e.PaymentMode,
+                        Amount = e.Amount,
+                        Remarks = e.Remarks,
+                        Screenshot = e.Screenshot
+                    });
+                }
+
+                return response;
+            }
+
+            // ✅ TRAVEL CLAIM
+            if (claim.Type == "InternationalTravels" && claim.TravelDetails != null)
+            {
+                response.TravelType = claim.Type;
+
+                response.TravelDetails = new TravelDetailsDto
+                {
+                    CurrencyType = claim.TravelDetails.CurrencyType,
+                    TravelStartDate = claim.TravelDetails.TravelStartDate,
+                    TravelEndDate = claim.TravelDetails.TravelEndDate,
+                    TotalDays = claim.TravelDetails.TotalDays,
+                    AdvanceAmount = claim.TravelDetails.AdvanceAmount,
+                    ReimbursementStatus=claim.TravelDetails.ReimbursementStatus
+                };
+
+                foreach (var c in claim.TravelDetails.CardCashEntries)
+                {
+                    response.TravelDetails.CardCashEntries.Add(new CashInfoDto
+                    {
+                        LoadedDate = c.LoadedDate,
+                        PaymentType = c.PaymentType,
+                        InrRate = c.InrRate,
+                        TotalLoadedAmount = c.TotalLoadedAmount
+                    });
+                }
+
+                // ✅ INTERNATIONAL EXPENSES
+                
+                    foreach (var i in claim.TravelDetails.Internationals)
+                    {
+                        response.InternationalExpenses.Add(new InternationalDto
+                        {
+                            Date = i.Date,
+                            SupportingNo = i.SupportingNo,
+                            Particulars = i.Particulars,
+                            PaymentMode = i.PaymentMode,
+                            CurrencyType = i.CurrencyType,
+                            Amount = i.Amount,
+                            ConvertedAmount = i.ConvertedAmount,
+                            Remarks = i.Remarks,
+                            Screenshot = i.Screenshot
+                        });
+                    }
+                }
+            
+
+            return response;
         }
+
+    
 
         /// <summary>
         /// Retrieves all claims for an employee by employee ID.

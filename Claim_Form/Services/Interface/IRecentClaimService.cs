@@ -34,7 +34,7 @@ namespace Claim_Form.Services.Interface
         /// </summary>
         /// <param name="id">Claim identifier.</param>
         /// <returns>Claim details if found; otherwise null.</returns>
-        Task<RecentClaimDto?> GetClaimAsync(Guid id);
+        Task<ClaimDetailResponseDto?> GetClaimAsync(Guid id);
 
         /// <summary>
         /// Retrieves all claims for an employee by employee identifier.
