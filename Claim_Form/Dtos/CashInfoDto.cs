@@ -8,7 +8,7 @@
         /// <summary>
         /// Date when the cash/card amount was loaded.
         /// </summary>
-        public DateTime LoadedDate { get; set; }
+        public DateOnly LoadedDate { get; set; }
 
         /// <summary>
         /// Type of payment method (Cash/Card).

@@ -1,0 +1,51 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Claim_Form.Migrations
+{
+    /// <inheritdoc />
+    public partial class Changeddate2 : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "TravelStartDate",
+                table: "TravelDetails",
+                type: "datetime2",
+                nullable: false,
+                oldClrType: typeof(DateOnly),
+                oldType: "date");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "TravelEndDate",
+                table: "TravelDetails",
+                type: "datetime2",
+                nullable: false,
+                oldClrType: typeof(DateOnly),
+                oldType: "date");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterColumn<DateOnly>(
+                name: "TravelStartDate",
+                table: "TravelDetails",
+                type: "date",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "datetime2");
+
+            migrationBuilder.AlterColumn<DateOnly>(
+                name: "TravelEndDate",
+                table: "TravelDetails",
+                type: "date",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "datetime2");
+        }
+    }
+}

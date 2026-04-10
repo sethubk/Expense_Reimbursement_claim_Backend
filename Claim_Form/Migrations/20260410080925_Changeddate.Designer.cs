@@ -4,6 +4,7 @@ using Claim_Form.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Claim_Form.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260410080925_Changeddate")]
+    partial class Changeddate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,11 +248,11 @@ namespace Claim_Form.Migrations
                     b.Property<int>("TotalDays")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("TravelEndDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("TravelEndDate")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("TravelStartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("TravelStartDate")
+                        .HasColumnType("date");
 
                     b.HasKey("TravelId");
 

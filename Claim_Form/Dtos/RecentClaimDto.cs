@@ -14,7 +14,7 @@
         /// <summary>
         /// Date on which the claim was created or submitted.
         /// </summary>
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
 
         /// <summary>
         /// Purpose or reason for the claim.

@@ -8,7 +8,7 @@
         /// <summary>
         /// Date on which the expense was incurred.
         /// </summary>
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
 
         /// <summary>
         /// Supporting reference number such as invoice or receipt number.

@@ -14,7 +14,7 @@
         /// Date on which the expense was incurred.
         /// Accepts ISO format (e.g., 2026-03-03).
         /// </summary>
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
 
         /// <summary>
         /// Description or particulars of the expense.
