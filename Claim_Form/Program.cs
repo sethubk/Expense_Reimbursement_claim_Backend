@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,7 @@ builder.Services.AddScoped<IInternationalTravelRepository, InternationalTravelRe
 builder.Services.AddScoped<IInternationalTravelService, InternationalTravelService>();
 builder.Services.AddScoped<IInternationalRepository, InternationalRepository>();
 builder.Services.AddScoped<IInternationalServices, InternationalService>();
+builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddCors(options =>
