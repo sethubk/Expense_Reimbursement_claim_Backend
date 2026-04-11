@@ -17,19 +17,27 @@ namespace Claim_Form.Services.Implementations
             _config = config;
             _context = context;
         }
-       
-        public async Task<string> SendMailByEmpCode(string empCode, Guid ClaimID)
+
+        public async Task<string> SendMailByEmpCode(string empCode, Guid ClaimID, string? imageBase64 = null)
         {
             // ✅ 1. Get Employee
             var emp = await _context.Employees
                 .FirstOrDefaultAsync(x => x.EmpCode == empCode);
+
             if (emp == null)
                 throw new Exception("Employee not found");
-            // ✅ 2. Get Latest Claim
-            var claim = await _context.RecentClaims.FirstOrDefaultAsync(c => c.RecentClaimId == ClaimID);
+
+            // ✅ 2. Get Claim
+            var claim = await _context.RecentClaims
+                .FirstOrDefaultAsync(c => c.RecentClaimId == ClaimID);
+
+            if (claim == null)
+                throw new Exception("Claim not found");
+
             // ✅ 3. Build Email
             string to = "ext_SKannan2@nordex-online.com";
             string subject = "New Expense Claim Submitted";
+
             string body = $@"
 <h3>Expense Claim Notification</h3>
 <p><b>Employee:</b> {emp.Name} ({emp.EmpCode})</p>
@@ -37,23 +45,27 @@ namespace Claim_Form.Services.Implementations
 <p><b>Total Amount:</b> ₹{claim.Amount}</p>
 <p><b>Status:</b> {claim.Status}</p>
 <p><b>Date:</b> {claim.Date}</p>
-       ";
-            // 🔥 4. Call SMTP Method
-            await SendEmail(to, subject, body);
-            // ✅ 5. Return response
+";
+
+            // 🔥 4. Call SMTP Method (pass image)
+            await SendEmail(to, subject, body, imageBase64);
+
             return $"Mail sent successfully to {to}";
         }
-        // 🔥 SMTP METHOD (Inside Same Service)
-        private async Task SendEmail(string to, string subject, string body)
+    
+
+    private async Task SendEmail(string to, string subject, string body, string? imageBase64 = null)
         {
             var email = _config["EmailSettings:Email"];
             var password = _config["EmailSettings:Password"];
             var host = _config["EmailSettings:Host"];
             var port = int.Parse(_config["EmailSettings:Port"]);
+
             using (var smtp = new SmtpClient(host, port))
             {
                 smtp.Credentials = new NetworkCredential(email, password);
                 smtp.EnableSsl = true;
+
                 using (var message = new MailMessage())
                 {
                     message.From = new MailAddress(email);
@@ -61,7 +73,29 @@ namespace Claim_Form.Services.Implementations
                     message.Subject = subject;
                     message.Body = body;
                     message.IsBodyHtml = true;
-                    await smtp.SendMailAsync(message); // ✅ SMTP send
+
+                    // ✅ 🔥 ADD IMAGE ATTACHMENT
+                    if (!string.IsNullOrEmpty(imageBase64))
+                    {
+                        try
+                        {
+                            var base64Data = imageBase64.Contains(",")
+                                ? imageBase64.Split(',')[1]
+                                : imageBase64;
+
+                            var bytes = Convert.FromBase64String(base64Data);
+                            var stream = new MemoryStream(bytes);
+
+                            var attachment = new Attachment(stream, "Expense.png", "image/png");
+                            message.Attachments.Add(attachment);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception("Invalid image format: " + ex.Message);
+                        }
+                    }
+
+                    await smtp.SendMailAsync(message);
                 }
             }
         }

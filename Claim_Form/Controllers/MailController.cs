@@ -1,4 +1,5 @@
-﻿using Claim_Form.Services.Interface;
+﻿using Claim_Form.Dtos;
+using Claim_Form.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,23 +28,29 @@ namespace Claim_Form.Controllers
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input parameters.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Employee or claim not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error.")]
-        public async Task<IActionResult> SendMail(string Empcode, Guid ClaimId)
+        public async Task<IActionResult> SendMail([FromBody] MailRequestDto request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(Empcode))
-                    return BadRequest("Employee code is required.");
 
-                if (ClaimId == Guid.Empty)
-                    return BadRequest("Claim ID is required.");
-
-                var result = await _mailService.SendMailByEmpCode(Empcode, ClaimId);
-
-                return Ok(new
                 {
-                    success = true,
-                    message = result
-                });
+                    if (string.IsNullOrWhiteSpace(request.Empcode))
+                        return BadRequest("Employee code required");
+
+                    if (request.ClaimId == Guid.Empty)
+                        return BadRequest("ClaimId required");
+                    var result = await _mailService.SendMailByEmpCode(
+        request.Empcode,
+        request.ClaimId,
+        request.ImageBase64
+    );
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = result
+                    });
+                }
             }
 
             catch (KeyNotFoundException ex)

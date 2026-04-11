@@ -2,6 +2,6 @@
 {
     public interface IMailService
     {
-        Task<string> SendMailByEmpCode(string empCode, Guid ClaimID);
+        Task<string> SendMailByEmpCode(string empCode, Guid ClaimID, string? imageBase64 = null);
     }
 }
