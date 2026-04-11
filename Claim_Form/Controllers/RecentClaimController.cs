@@ -201,5 +201,48 @@ namespace Claim_Form.Controllers
                     "An error occurred while deleting the draft claim.");
             }
         }
+
+
+        /// <summary>
+        /// Updates an existing claim for a specific employee.
+        /// </summary>
+        /// <param name="input">Updated claim details.</param>
+       
+        /// <param name="claimId">Claim identifier.</param>
+        /// <returns>Updated claim.</returns>
+        // PUT api/recentClaim/<employeeCode>/<claimId>/claim 
+        [HttpPut("{claimId}/claimstatus")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateClaimStatus(
+             [FromRoute] Guid claimId,[FromBody] ClaimStatusDto status
+            
+           )
+        {
+            if (status == null)
+                return BadRequest("Request body is required.");
+
+
+            if (claimId == Guid.Empty)
+                return BadRequest("Invalid claim id.");
+
+            try
+            {
+                var result = await _recentClaimService.UpdateClaimStatusAsync(status, claimId);
+
+                if (result == null)
+                    return NotFound($"Claim '{claimId}' not found.");
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while updating the claim.");
+            }
+        }
     }
 }

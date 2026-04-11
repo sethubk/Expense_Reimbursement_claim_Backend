@@ -8,7 +8,7 @@ namespace Claim_Form.Dtos
         public Guid RecentClaimId { get; set; }
         public string ClaimType { get; set; } = string.Empty;
         public string? TravelType { get; set; }
-
+        public string ClaimStatus { get; set; } = string.Empty;
         public TravelDetailsDto? TravelDetails { get; set; }
 
         public List<ExpenseDto> Expenses { get; set; } = new();

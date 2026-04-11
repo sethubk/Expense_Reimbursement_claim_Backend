@@ -46,5 +46,8 @@ namespace Claim_Form.Repositories.Interface
         /// </summary>
         /// <param name="empCode">Employee code.</param>
         Task DeleteDraftAsync(string empCode);
+
+
+        Task ClaimStatusAsync(RecentClaim claim);
     }
 }

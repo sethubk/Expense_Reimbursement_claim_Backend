@@ -104,7 +104,8 @@ namespace Claim_Form.Services.Implementations
             var response = new ClaimDetailResponseDto
             {
                 RecentClaimId = claim.RecentClaimId,
-                ClaimType = claim.Type
+                ClaimType = claim.Type,
+                ClaimStatus=claim.Status
             };
 
             if (claim.Type == "Expense")
@@ -219,6 +220,35 @@ namespace Claim_Form.Services.Implementations
 
             await _claimRepository.DeleteDraftAsync(empCode);
             return true;
+        }
+
+
+        public async Task<RecentClaimDto?> UpdateClaimStatusAsync(
+             ClaimStatusDto status,
+           
+           Guid claimId)
+        {
+           
+
+            var claim = await _claimRepository.GetByIdAsync(claimId);
+            if (claim == null)
+                return null;
+
+            claim.Status = status.ClaimStatus;
+            
+           
+
+            await _claimRepository.UpdateAsync(claim);
+
+            //return new RecentClaimDto
+            //{
+            //    Type = claim.Type,
+            //    Date = claim.Date,
+            //    Purpose = claim.Purpose,
+            //    Status = claim.Status,
+            //    Amount = claim.Amount
+            //};
+            return _mapper.Map<RecentClaimDto>(claim);
         }
     }
 }

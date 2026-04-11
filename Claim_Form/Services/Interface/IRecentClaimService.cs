@@ -56,5 +56,9 @@ namespace Claim_Form.Services.Interface
         /// <param name="empCode">Employee code.</param>
         /// <returns>True if deleted; false if nothing to delete.</returns>
         Task<bool> DeleteDraftAsync(string empCode);
+        Task<RecentClaimDto?> UpdateClaimStatusAsync(
+             ClaimStatusDto status,
+
+           Guid claimId);
     }
 }

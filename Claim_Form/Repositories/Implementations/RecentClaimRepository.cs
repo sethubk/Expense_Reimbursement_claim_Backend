@@ -122,5 +122,16 @@ namespace Claim_Form.Repositories.Implementations
             _context.RecentClaims.RemoveRange(drafts);
             await _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Updates an existing claim.
+        /// </summary>
+        /// <param name="claim">Claim entity.</param>
+        public async Task ClaimStatusAsync(RecentClaim claim)
+        {
+            _context.RecentClaims.Update(claim);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
