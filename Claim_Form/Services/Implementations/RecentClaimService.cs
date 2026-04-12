@@ -4,6 +4,7 @@ using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 
 namespace Claim_Form.Services.Implementations
@@ -264,7 +265,9 @@ namespace Claim_Form.Services.Implementations
             return true;
         }
 
-
+        /// <summary>
+        /// Update claim statsus for an employee.
+        /// </summary>
         public async Task<RecentClaimDto?> UpdateClaimStatusAsync(
              ClaimStatusDto status,
            
@@ -291,6 +294,33 @@ namespace Claim_Form.Services.Implementations
             //    Amount = claim.Amount
             //};
             return _mapper.Map<RecentClaimDto>(claim);
+        }
+
+        // for admin only 
+        /// <summary>
+        ///get all claims 
+        /// </summary>
+        public async Task<List<RecentclaimwithEmpname>> GetAllClaimsAsync()
+        {
+            var claim = await _claimRepository.GetAllPendingClaims();
+            //return _mapper.Map<List<EmpWithClaimDto>>(claim);
+
+            return claim.Select(c => new RecentclaimwithEmpname
+            {
+                EmpCode=c.Employee.EmpCode,
+                Name=c.Employee.Name,
+                RecentClaimId=c.RecentClaimId,
+                Type = c.Type,
+                Date = c.Date,
+                Purpose = c.Purpose,
+                Amount = c.Amount,
+                Status = c.Status
+                
+            }).ToList();
+
+
+
+           
         }
     }
 }

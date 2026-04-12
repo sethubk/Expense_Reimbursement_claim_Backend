@@ -14,11 +14,11 @@ namespace Claim_Form.Mapping
 
             CreateMap<RecentClaim, RecentClaimDto>();
             // Parent mapping
-            CreateMap<Employee, EmpWithClaimDto>()
-                .ForMember(
-                    destination => destination.RecentClaims,
-                    options => options.MapFrom(source => source.RecentClaims)
-                );
+            //CreateMap<Employee, EmpWithClaimDto>()
+            //    .ForMember(
+            //        destination => destination.RecentClaims,
+            //        options => options.MapFrom(source => source.RecentClaims)
+            //    );
 
             
             CreateMap<Expense, ExpenseDto>();
@@ -50,6 +50,7 @@ namespace Claim_Form.Mapping
 
             CreateMap<RecentClaim, RecentClaimResponseDto>();
             CreateMap<RecentClaim, RecentClaimDto>();
+            CreateMap<RecentClaim, EmpWithClaimDto>();
 
             CreateMap<Domestic,DomesticDto>();
 

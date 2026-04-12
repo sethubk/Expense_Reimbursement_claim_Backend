@@ -3,6 +3,7 @@ using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
 
 namespace Claim_Form.Repositories.Implementations
 {
@@ -133,5 +134,16 @@ namespace Claim_Form.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
+        // admin only
+        /// <summary>
+        /// Admin can access the all claims
+        /// </summary>
+        /// <param name="claim">Claim entity.</param>
+        public async Task<List<RecentClaim?>>GetAllPendingClaims()
+        {
+            return await _context.RecentClaims.Include(c => c.Employee).Where(c => c.Status =="pending")
+
+                 .ToListAsync();
+        }
     }
 }

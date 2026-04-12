@@ -58,8 +58,7 @@ namespace Claim_Form.Controllers
             catch (Exception ex)
             {
                 // Ideally log the exception here
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An error occurred while processing the login request.");
+                return BadRequest();
             }
         }
 

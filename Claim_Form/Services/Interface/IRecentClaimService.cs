@@ -60,5 +60,8 @@ namespace Claim_Form.Services.Interface
              ClaimStatusDto status,
 
            Guid claimId);
+        Task<List<RecentclaimwithEmpname>> GetAllClaimsAsync();
     }
+
+   
 }

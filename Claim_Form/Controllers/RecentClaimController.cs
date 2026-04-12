@@ -244,5 +244,38 @@ namespace Claim_Form.Controllers
                     "An error occurred while updating the claim.");
             }
         }
+
+        /// <summary>
+        /// Retrieves all claims .
+        /// </summary>
+
+        /// <returns>Employee claims.</returns>
+        //  // get api/recentClaim/ID/Expense
+        //[Authorize(Roles ="Admin")]
+        [HttpGet("Allclaims")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllPendingClaims()
+        {
+            
+
+            try
+            {
+                var result = await _recentClaimService.GetAllClaimsAsync();
+
+                if (result == null)
+                    return NotFound("No claims found for this employee.");
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while retrieving claims.");
+            }
+        }
     }
 }

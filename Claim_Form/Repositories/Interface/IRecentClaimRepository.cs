@@ -1,4 +1,5 @@
 ﻿using Claim_Form.Entities;
+using System.Collections;
 
 namespace Claim_Form.Repositories.Interface
 {
@@ -49,5 +50,8 @@ namespace Claim_Form.Repositories.Interface
 
 
         Task ClaimStatusAsync(RecentClaim claim);
+
+        //admin access
+        Task<List<RecentClaim?>> GetAllPendingClaims();
     }
 }
