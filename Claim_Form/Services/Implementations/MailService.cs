@@ -20,14 +20,14 @@ namespace Claim_Form.Services.Implementations
        
         public async Task<string> SendMailByEmpCode(string empCode, Guid ClaimID)
         {
-            // ✅ 1. Get Employee
+            //  Get Employee
             var emp = await _context.Employees
                 .FirstOrDefaultAsync(x => x.EmpCode == empCode);
             if (emp == null)
                 throw new Exception("Employee not found");
-            // ✅ 2. Get Latest Claim
+            //  Get Latest Claim
             var claim = await _context.RecentClaims.FirstOrDefaultAsync(c => c.RecentClaimId == ClaimID);
-            // ✅ 3. Build Email
+            // . Build Email
             string to = "ext_SKannan2@nordex-online.com";
             string subject = "New Expense Claim Submitted";
             string body = $@"
@@ -38,12 +38,39 @@ namespace Claim_Form.Services.Implementations
 <p><b>Status:</b> {claim.Status}</p>
 <p><b>Date:</b> {claim.Date}</p>
        ";
-            // 🔥 4. Call SMTP Method
+            // Call SMTP Method
             await SendEmail(to, subject, body);
-            // ✅ 5. Return response
+            //  Return response
             return $"Mail sent successfully to {to}";
         }
-        // 🔥 SMTP METHOD (Inside Same Service)
+        //  METHOD (Inside Same Service)
+
+        public async Task<string> AdminAction(string empCode, Guid ClaimID)
+        {
+            
+            var emp = await _context.Employees
+                .FirstOrDefaultAsync(x => x.EmpCode == empCode);
+            if (emp == null)
+                throw new Exception("Employee not found");
+            //  Get Latest Claim
+            var claim = await _context.RecentClaims.FirstOrDefaultAsync(c => c.RecentClaimId == ClaimID);
+            //  Build Email
+            string to = "ext_SKannan2@nordex-online.com";
+            string subject = "New Expense Claim Submitted";
+            string body = $@"
+<h3>Expense Claim Action Taken by Admin {claim.Status}</h3>
+<p><b>Employee:</b> {emp.Name} ({emp.EmpCode})</p>
+<p><b>Claim Type:</b> {claim.Type}</p>
+<p><b>Total Amount:</b> ₹{claim.Amount}</p>
+
+
+       ";
+            // Call SMTP Method
+            await SendEmail(to, subject, body);
+            //  Return response
+            return $"Mail sent successfully to {to}";
+        }
+        //  (Inside Same Service
         private async Task SendEmail(string to, string subject, string body)
         {
             var email = _config["EmailSettings:Email"];

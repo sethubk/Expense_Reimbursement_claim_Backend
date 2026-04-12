@@ -58,7 +58,7 @@ namespace Claim_Form.Controllers
             catch (Exception ex)
             {
                 // Ideally log the exception here
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
 
