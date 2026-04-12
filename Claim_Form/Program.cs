@@ -34,6 +34,8 @@ builder.Services.AddScoped<IInternationalTravelService, InternationalTravelServi
 builder.Services.AddScoped<IInternationalRepository, InternationalRepository>();
 builder.Services.AddScoped<IInternationalServices, InternationalService>();
 builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IDomesticRepository, DomesticRepository>();
+builder.Services.AddScoped<IDomesticService, DomesticService>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddCors(options =>

@@ -70,8 +70,8 @@ namespace Claim_Form.Repositories.Implementations
                     .ThenInclude(c => c.CardCashEntries)
                     .Include(c => c.TravelDetails)
                         .ThenInclude(t => t.Internationals)
-                    //.Include(c => c.TravelDetails)
-                    //    .ThenInclude(t => t.Domestics)
+                    .Include(c => c.TravelDetails)
+                        .ThenInclude(t => t.Domestics)
                     .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
 
 

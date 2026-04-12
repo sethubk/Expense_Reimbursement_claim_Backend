@@ -152,26 +152,68 @@ namespace Claim_Form.Services.Implementations
                     });
                 }
 
-                
-                    foreach (var i in claim.TravelDetails.Internationals)
-                    {
-                        response.InternationalExpenses.Add(new InternationalDto
-                        {
-                            Date = i.Date,
-                            SupportingNo = i.SupportingNo,
-                            Particulars = i.Particulars,
-                            PaymentMode = i.PaymentMode,
-                            CurrencyType = i.CurrencyType,
-                            Amount = i.Amount,
-                            ConvertedAmount = i.ConvertedAmount,
-                            Remarks = i.Remarks,
-                            Screenshot = i.Screenshot
-                        });
-                    }
-                }
-            
 
-            return response;
+                foreach (var i in claim.TravelDetails.Internationals)
+                {
+                    response.InternationalExpenses.Add(new InternationalDto
+                    {
+                        Date = i.Date,
+                        SupportingNo = i.SupportingNo,
+                        Particulars = i.Particulars,
+                        PaymentMode = i.PaymentMode,
+                        CurrencyType = i.CurrencyType,
+                        Amount = i.Amount,
+                        ConvertedAmount = i.ConvertedAmount,
+                        Remarks = i.Remarks,
+                        Screenshot = i.Screenshot
+                    });
+                }
+
+
+            }
+            if (claim.Type == "DomesticTravels" && claim.TravelDetails != null)
+            {
+                response.TravelType = claim.Type;
+
+                response.TravelDetails = new TravelDetailsDto
+                {
+                    CurrencyType = claim.TravelDetails.CurrencyType,
+                    TravelStartDate = claim.TravelDetails.TravelStartDate,
+                    TravelEndDate = claim.TravelDetails.TravelEndDate,
+                    TotalDays = claim.TravelDetails.TotalDays,
+                    AdvanceAmount = claim.TravelDetails.AdvanceAmount,
+                    ReimbursementStatus=claim.TravelDetails.ReimbursementStatus
+                };
+
+                foreach (var c in claim.TravelDetails.CardCashEntries)
+                {
+                    response.TravelDetails.CardCashEntries.Add(new CashInfoDto
+                    {
+                        LoadedDate = c.LoadedDate,
+                        PaymentType = c.PaymentType,
+                        InrRate = c.InrRate,
+                        TotalLoadedAmount = c.TotalLoadedAmount
+                    });
+                }
+
+
+                foreach (var i in claim.TravelDetails.Domestics)
+                {
+                    response.DomesticExpenses.Add(new DomesticDto
+                    {
+                        Date = i.Date,
+                        SupportingNo = i.SupportingNo,
+                        Particulars = i.Particulars,
+                        PaymentMode = i.PaymentMode,
+                        Amount = i.Amount,
+                        Remarks = i.Remarks,
+                        Screenshot = i.Screenshot
+                    });
+                }
+
+            }
+                return response;
+            
         }
 
     

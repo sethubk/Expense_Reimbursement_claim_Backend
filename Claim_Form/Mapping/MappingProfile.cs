@@ -50,6 +50,9 @@ namespace Claim_Form.Mapping
 
             CreateMap<RecentClaim, RecentClaimResponseDto>();
             CreateMap<RecentClaim, RecentClaimDto>();
+
+            CreateMap<Domestic,DomesticDto>();
+
         }
     }
 }

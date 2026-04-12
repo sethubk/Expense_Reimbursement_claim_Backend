@@ -4,36 +4,32 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Claim_Form.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class InternationalExpenseController : ControllerBase
+    [ApiController]
+    public class DomesticExpenseController : ControllerBase
     {
-        private readonly IInternationalServices _internationalService;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InternationalExpenseController"/>.
-        /// </summary>
-        /// <param name="internationalService">International expense service.</param>
-        public InternationalExpenseController(IInternationalServices internationalService)
+        private readonly IDomesticService _domesticService;
+        public DomesticExpenseController(IDomesticService domesticService)
         {
-            _internationalService = internationalService;
+            _domesticService = domesticService;
         }
 
-        /// <summary>
-        /// Creates multiple international expenses for a single claim.
+        // <summary>
+        /// Create a domestic expense by its identifier.
         /// </summary>
-        /// <param name="ClaimId">Claim identifier.</param>
-        /// <param name="entries">List of international expense entries.</param>
-        /// <returns>Created international expenses.</returns>
-        ///  // POST api/International/ClaimID/international
-        [HttpPost("{ClaimId}/InternationalExpense")]
+        /// <param name="ClaimId">Domestic expense identifier.</param>
+        /// <returns>Domestic expense details.</returns>
+
+        ///  // POST api/Domestic/ClaimID/Domestic
+        [HttpPost("{ClaimId}/DomesticExpense")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateInternationalExpense(
             [FromRoute] Guid ClaimId,
-            [FromBody] List<InternationalDto> entries)
+            [FromBody] List<DomesticDto> entries)
         {
             if (ClaimId == Guid.Empty)
                 return BadRequest("Claim id is required.");
@@ -43,7 +39,7 @@ namespace Claim_Form.Controllers
 
             try
             {
-                var result = await _internationalService.CreateInternationalExpense(ClaimId, entries);
+                var result = await _domesticService.CreateDomesticExpense(ClaimId, entries);
 
                 if (result == null)
                     return NotFound($"No claim found with id '{ClaimId}'.");
@@ -58,28 +54,31 @@ namespace Claim_Form.Controllers
             }
         }
 
-        /// <summary>
-        /// Retrieves an international expense by its identifier.
+
+
+        // <summary>
+        /// Retrieves a domestic expense by its identifier.
         /// </summary>
-        /// <param name="internationalId">International expense identifier.</param>
-        /// <returns>International expense details.</returns>
-        ///  Get api/International/ClaimID/international
-        [HttpGet("{internationalId}/international")]
+        /// <param name="id">Domestic expense identifier.</param>
+        /// <returns>Domestic expense details.</returns>
+        /// GET api/domestic-expense/{id}
+
+        [HttpGet("{claimId}/Domestic")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetById([FromRoute] Guid internationalId)
+        public async Task<IActionResult> GetById([FromRoute] Guid claimId)
         {
-            if (internationalId == Guid.Empty)
+            if (claimId == Guid.Empty)
                 return BadRequest("Invalid international expense id.");
 
             try
             {
-                var expense = await _internationalService.GetInternationalAsync(internationalId);
+                var expense = await _domesticService.GetDomesticAsync(claimId);
 
                 if (expense == null)
-                    return NotFound($"No international expense found with id '{internationalId}'.");
+                    return NotFound($"No international expense found with id '{claimId}'.");
 
                 return Ok(expense);
             }
@@ -91,23 +90,25 @@ namespace Claim_Form.Controllers
             }
         }
 
+
         /// <summary>
-        /// Updates an existing international expense.
+        /// Updates an existing domestic expense.
         /// </summary>
-        /// <param name="internationalId">International expense identifier.</param>
-        /// <param name="input">Updated international expense data.</param>
-        /// <returns>Updated international expense.</returns>
-        ///  Put api/International/ClaimID/international
-        [HttpPut("{internationalId}/international")]
+        /// <param name="id">Domestic expense identifier.</param>
+        /// <param name="input">Updated domestic expense data.</param>
+        /// <returns>Updated domestic expense.</returns>
+        /// PUT api/domestic-expense/{id}
+
+        [HttpPut("{claimId}/Domestic")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(
-            [FromRoute] Guid internationalId,
-            [FromBody] InternationalDto input)
+            [FromRoute] Guid cliamid,
+            [FromBody] DomesticDto input)
         {
-            if (internationalId == Guid.Empty)
+            if (cliamid == Guid.Empty)
                 return BadRequest("Invalid international expense id.");
 
             if (input == null)
@@ -115,10 +116,10 @@ namespace Claim_Form.Controllers
 
             try
             {
-                var updated = await _internationalService.UpdateInternationalAsync(internationalId, input);
+                var updated = await _domesticService.UpdateDomesticAsync(cliamid, input);
 
                 if (updated == null)
-                    return NotFound($"No international expense found with id '{internationalId}'.");
+                    return NotFound($"No international expense found with id '{cliamid}'.");
 
                 return Ok(updated);
             }
@@ -131,27 +132,27 @@ namespace Claim_Form.Controllers
         }
 
         /// <summary>
-        /// Deletes an international expense by its identifier.
+        /// Deletes an Domestic expense by its identifier.
         /// </summary>
-        /// <param name="internationalId">International expense identifier.</param>
+        /// <param name="ClaimId">Domestic expense identifier.</param>
         /// <returns>No content.</returns>
-        ///  delete api/International/ClaimID/international
-        [HttpDelete("{internationalId}/international")]
+        ///  delete api/Domestic/ClaimID/Domestic
+        [HttpDelete("{claimId}/Domestic")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete([FromRoute] Guid internationalId)
+        public async Task<IActionResult> Delete([FromRoute] Guid ClaimId)
         {
-            if (internationalId == Guid.Empty)
+            if (ClaimId == Guid.Empty)
                 return BadRequest("Invalid international expense id.");
 
             try
             {
-                var deleted = await _internationalService.DeleteInternationalAsync(internationalId);
+                var deleted = await _domesticService.DeleteDomesticAsync(ClaimId);
 
                 if (deleted == null)
-                    return NotFound($"No international expense found with id '{internationalId}'.");
+                    return NotFound($"No international expense found with id '{ClaimId}'.");
 
                 return NoContent();
             }
@@ -163,4 +164,5 @@ namespace Claim_Form.Controllers
             }
         }
     }
+
 }

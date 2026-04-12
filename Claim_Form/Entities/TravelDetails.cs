@@ -62,5 +62,8 @@ namespace Claim_Form.Entities
         /// International expense entries associated with this travel.
         /// </summary>
         public ICollection<International> Internationals { get; set; } = new List<International>();
+
+
+        public ICollection<Domestic>Domestics { get; set; }=new List<Domestic>();
     }
 }

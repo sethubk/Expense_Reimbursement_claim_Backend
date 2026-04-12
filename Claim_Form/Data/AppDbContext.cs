@@ -47,6 +47,8 @@ namespace Claim_Form.Data
         /// </summary>
         public DbSet<CashInfo> CashInfos { get; set; }
 
+        public DbSet<Domestic>Domestics{ get; set; }
+
         #endregion
 
         /// <summary>
@@ -91,6 +93,12 @@ namespace Claim_Form.Data
                 .WithOne(i => i.TravelDetails)
                 .HasForeignKey(i => i.TravelId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TravelDetails>()
+               .HasMany(td => td.Domestics)
+               .WithOne(i => i.TravelDetails)
+               .HasForeignKey(i => i.TravelId)
+               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

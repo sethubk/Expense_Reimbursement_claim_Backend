@@ -13,6 +13,8 @@ namespace Claim_Form.Dtos
 
         public List<ExpenseDto> Expenses { get; set; } = new();
         public List<InternationalDto> InternationalExpenses { get; set; } = new();
+
+        public List<DomesticDto>DomesticExpenses { get; set; }= new();
     }
 
 
