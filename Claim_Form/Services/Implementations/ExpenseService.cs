@@ -31,25 +31,70 @@ namespace Claim_Form.Services.Implementations
         /// Creates multiple expense entries for a claim.
         /// </summary>
         public async Task<IEnumerable<ExpenseDto>> CreateExpenseAsync(
-            Guid claimId,
-            List<ExpenseEntryDto> entries)
+     Guid claimId,
+     List<ExpenseEntryDto> entries)
         {
             var claim = await _recentClaimRepository.GetByIdAsync(claimId);
 
             if (claim == null)
                 throw new InvalidOperationException("Claim not found.");
 
-            var expenses = entries.Select(e => new Expense
+            var expenses = new List<Expense>();
+
+            foreach (var e in entries)
             {
-                RecentClaimId = claimId,
-                Date = e.Date,
-                SupportingNo = e.SupportingNo,
-                Particulars = e.Particulars,
-                PaymentMode = e.PaymentMode,
-                Amount = e.Amount,
-                Remarks = e.Remarks,
-                Screenshot = e.Screenshot ?? string.Empty
-            }).ToList();
+                string imagePath = null;
+
+                if (e.Screenshot != null)
+                {
+                    // Folder path
+                    var allowedExtensions = new[] { ".jpg", ".png", ".jpeg" };
+
+                    var extension = Path.GetExtension(e.Screenshot.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(extension))
+                    {
+                        throw new Exception("Invalid file type");
+                    }
+
+                    var folderPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot/uploads/expenses"
+                    );
+
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // Unique file name
+                    var fileName = Guid.NewGuid().ToString() +
+                                   Path.GetExtension(e.Screenshot.FileName);
+
+                    var fullPath = Path.Combine(folderPath, fileName);
+
+                    // Save file
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await e.Screenshot.CopyToAsync(stream);
+                    }
+
+                    // Save URL path (THIS GOES TO DB)
+                    imagePath = $"/uploads/expenses/{fileName}";
+                }
+
+                expenses.Add(new Expense
+                {
+                    RecentClaimId = claimId,
+                    Date = e.Date,
+                    SupportingNo = e.SupportingNo,
+                    Particulars = e.Particulars,
+                    PaymentMode = e.PaymentMode,
+                    Amount = e.Amount,
+                    Remarks = e.Remarks,
+                    Screenshot = imagePath ?? string.Empty
+                });
+            }
 
             await _expenseRepository.AddExpenseAsync(expenses);
 

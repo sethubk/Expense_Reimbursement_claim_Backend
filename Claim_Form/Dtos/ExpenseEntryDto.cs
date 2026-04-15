@@ -45,6 +45,6 @@
         /// Screenshot or receipt file path / Base64 string.
         /// Nullable when no attachment is provided.
         /// </summary>
-        public string? Screenshot { get; set; }
+        public IFormFile? Screenshot { get; set; }
     }
 }

@@ -80,7 +80,7 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API for employee claims with JWT authentication"
     });
-
+    c.SchemaFilter<FormFileSchemaFilter>(); 
     c.EnableAnnotations();
 });
 
@@ -101,7 +101,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

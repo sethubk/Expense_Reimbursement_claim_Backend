@@ -28,24 +28,25 @@ namespace Claim_Form.Controllers
         /// <returns>Created expense entries.</returns>
         /// // POST api/Expense/ID/Expense
         [HttpPost("{claimId}/Expense")]
+        [Consumes("multipart/form-data")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expenses created successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input data.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Claim not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
         public async Task<IActionResult> CreateExpense(
             [FromRoute] Guid claimId,
-            [FromBody] List<ExpenseEntryDto> entries)
+            [FromForm(Name = "entries")] ExpenseRequestDto entries)
         {
             if (claimId == Guid.Empty)
                 return BadRequest("Claim id is required.");
 
-            if (entries == null || entries.Count == 0)
+            if (entries == null )
                 return BadRequest("Expense entries are required.");
 
             try
             {
-                var result = await _expenseService.CreateExpenseAsync(claimId, entries);
-
+                var result = await _expenseService.CreateExpenseAsync(claimId, entries.entries);
+               
                 if (result == null)
                     return NotFound($"No claim found with id '{claimId}'.");
 
