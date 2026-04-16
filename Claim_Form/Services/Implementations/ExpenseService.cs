@@ -31,40 +31,58 @@ namespace Claim_Form.Services.Implementations
         /// Creates multiple expense entries for a claim.
         /// </summary>
         public async Task<IEnumerable<ExpenseDto>> CreateExpenseAsync(
-            Guid claimId,
-            List<ExpenseEntryDto> entries)
+     Guid claimId,
+     List<ExpenseEntryDto> entries)
         {
             var claim = await _recentClaimRepository.GetByIdAsync(claimId);
 
             if (claim == null)
                 throw new InvalidOperationException("Claim not found.");
 
-            var expenses = entries.Select(e => new Expense
+            if (claim.Expenses.Any())
             {
-                RecentClaimId = claimId,
-                Date = e.Date,
-                SupportingNo = e.SupportingNo,
-                Particulars = e.Particulars,
-                PaymentMode = e.PaymentMode,
-                Amount = e.Amount,
-                Remarks = e.Remarks,
-                Screenshot = e.Screenshot ?? string.Empty
-            }).ToList();
+                await _expenseRepository.DeleteAsync(claimId);
+            }
 
-            await _expenseRepository.AddExpenseAsync(expenses);
 
-            //return expenses.Select(e => new ExpenseDto
+           
+                var expenses = entries.Select(e => new Expense
+                {
+                    RecentClaimId = claimId,
+                    Date = e.Date,
+                    SupportingNo = e.SupportingNo,
+                    Particulars = e.Particulars,
+                    PaymentMode = e.PaymentMode,
+                    Amount = e.Amount,
+                    Remarks = e.Remarks,
+                    Screenshot = e.Screenshot ?? string.Empty
+                }).ToList();
+
+                await _expenseRepository.AddExpenseAsync(expenses);
+
+                return _mapper.Map<List<ExpenseDto>>(expenses);
+            }
+
+           
+            //var existingExpenses = claim.Expenses.ToList();
+
+            //for (int i = 0; i < existingExpenses.Count && i < entries.Count; i++)
             //{
-            //    Date = e.Date,
-            //    SupportingNo = e.SupportingNo,
-            //    Particulars = e.Particulars,
-            //    PaymentMode = e.PaymentMode,
-            //    Amount = e.Amount,
-            //    Remarks = e.Remarks,
-            //    Screenshot = e.Screenshot
-            //});
-            return _mapper.Map<List<ExpenseDto>>(expenses);
-        }
+            //    existingExpenses[i].Id=claim.Expenses.
+            //    existingExpenses[i].Date = entries[i].Date;
+            //    existingExpenses[i].SupportingNo = entries[i].SupportingNo;
+            //    existingExpenses[i].Particulars = entries[i].Particulars;
+            //    existingExpenses[i].PaymentMode = entries[i].PaymentMode;
+            //    existingExpenses[i].Amount = entries[i].Amount;
+            //    existingExpenses[i].Remarks = entries[i].Remarks;
+            //    existingExpenses[i].Screenshot = entries[i].Screenshot ?? string.Empty;
+            //}
+
+            //await _expenseRepository.UpdateAsync(existingExpenses);
+
+            //return _mapper.Map<List<ExpenseDto>>(existingExpenses);
+        
+
 
         /// <summary>
         /// Retrieves an expense by its identifier.
@@ -97,7 +115,7 @@ namespace Claim_Form.Services.Implementations
             expense.Remarks = dto.Remarks;
             expense.Screenshot = dto.Screenshot;
 
-            await _expenseRepository.UpdateAsync(expense);
+            //await _expenseRepository.UpdateAsync(expense);
 
             return dto;
         }

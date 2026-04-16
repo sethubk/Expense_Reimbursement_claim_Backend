@@ -9,8 +9,11 @@ namespace Claim_Form.Dtos
         public string ClaimType { get; set; } = string.Empty;
         public string? TravelType { get; set; }
         public string ClaimStatus { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public string Empcode { get; set; }
         public TravelDetailsDto? TravelDetails { get; set; }
 
+     
         public List<ExpenseDto> Expenses { get; set; } = new();
         public List<InternationalDto> InternationalExpenses { get; set; } = new();
 

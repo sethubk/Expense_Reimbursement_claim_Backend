@@ -22,7 +22,7 @@ namespace Claim_Form.Services.Interface
         /// </summary>
         /// <param name="id">International expense identifier.</param>
         /// <returns>International expense if found; otherwise null.</returns>
-        Task<InternationalDto?> GetInternationalAsync(Guid id);
+        Task<InternationalDto?> GetInternationalAsync(Guid claimId);
 
         /// <summary>
         /// Updates an existing international expense.

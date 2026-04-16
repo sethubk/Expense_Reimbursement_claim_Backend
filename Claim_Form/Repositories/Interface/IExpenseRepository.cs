@@ -24,7 +24,7 @@ namespace Claim_Form.Repositories.Interface
         /// Updates an existing expense entry.
         /// </summary>
         /// <param name="expense">Expense entity.</param>
-        Task UpdateAsync(Expense expense);
+        Task UpdateAsync(IEnumerable<Expense> expenses);
 
         /// <summary>
         /// Deletes an expense by its identifier.

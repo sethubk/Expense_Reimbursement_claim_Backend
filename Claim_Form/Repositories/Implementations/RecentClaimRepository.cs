@@ -66,6 +66,7 @@ namespace Claim_Form.Repositories.Implementations
 
             return await _context.RecentClaims
                     .AsNoTracking()
+                    .Include(c=>c.Employee)
                     .Include(c => c.Expenses)
                     .Include(c => c.TravelDetails)
                     .ThenInclude(c => c.CardCashEntries)

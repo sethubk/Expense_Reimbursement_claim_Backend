@@ -73,24 +73,35 @@ namespace Claim_Form.Services.Implementations
         //  (Inside Same Service
         private async Task SendEmail(string to, string subject, string body)
         {
-            var email = _config["EmailSettings:Email"];
-            var password = _config["EmailSettings:Password"];
-            var host = _config["EmailSettings:Host"];
-            var port = int.Parse(_config["EmailSettings:Port"]);
-            using (var smtp = new SmtpClient(host, port))
+            try
             {
-                smtp.Credentials = new NetworkCredential(email, password);
-                smtp.EnableSsl = true;
-                using (var message = new MailMessage())
+                var email = _config["EmailSettings:Email"];
+                var password = _config["EmailSettings:Password"];
+                var host = _config["EmailSettings:Host"];
+                var port = int.Parse(_config["EmailSettings:Port"]);
+
+                using var smtp = new SmtpClient(host, port)
                 {
-                    message.From = new MailAddress(email);
-                    message.To.Add(to);
-                    message.Subject = subject;
-                    message.Body = body;
-                    message.IsBodyHtml = true;
-                    await smtp.SendMailAsync(message); // ✅ SMTP send
-                }
+                    EnableSsl = true,
+                    Credentials = new NetworkCredential(email, password),
+                    Timeout = 15000 // ✅ important
+                };
+
+                using var message = new MailMessage(email, to)
+                {
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                await smtp.SendMailAsync(message);
+            }
+            catch (Exception ex)
+            {
+                // ✅ LOG EVERYTHING
+                throw new Exception($"SMTP FAILED: {ex}");
             }
         }
+
     }
 }

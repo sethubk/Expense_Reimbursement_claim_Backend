@@ -41,5 +41,10 @@ namespace Claim_Form.Repositories.Interface
         /// <param name="travelId">Travel identifier.</param>
         /// <returns>Travel details if found; otherwise null.</returns>
         Task<TravelDetails?> GetByIdAsync(Guid travelId);
+
+        Task DeleteByTravelIdAsync(Guid travelId);
+        Task DeleteCardCashEntriesAsync(Guid travelId);
+
+        Task SaveChangesAsync();
     }
 }

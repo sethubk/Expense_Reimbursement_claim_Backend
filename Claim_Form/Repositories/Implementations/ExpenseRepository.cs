@@ -2,6 +2,7 @@
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Claim_Form.Repositories.Implementations
 {
@@ -40,18 +41,19 @@ namespace Claim_Form.Repositories.Implementations
         {
             return await _context.Expenses
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(e => e.RecentClaimId == id);
         }
 
         /// <summary>
         /// Updates an existing expense entry.
         /// </summary>
         /// <param name="expense">Expense entity.</param>
-        public async Task UpdateAsync(Expense expense)
+        public async Task UpdateAsync(IEnumerable<Expense> expenses)
         {
-            _context.Expenses.Update(expense);
+            _context.Expenses.UpdateRange(expenses);
             await _context.SaveChangesAsync();
         }
+
 
         /// <summary>
         /// Deletes an expense by its identifier.
@@ -59,14 +61,16 @@ namespace Claim_Form.Repositories.Implementations
         /// <param name="id">Expense identifier.</param>
         public async Task DeleteAsync(Guid id)
         {
-            var expense = await _context.Expenses.FindAsync(id);
 
-            if (expense == null)
-                return;
+            var expenses = await _context.Expenses
+                    .Where(x => x.RecentClaimId == id)
+                    .ToListAsync();
 
-            _context.Expenses.Remove(expense);
+            _context.Expenses.RemoveRange(expenses);
             await _context.SaveChangesAsync();
+
         }
+
 
         /// <summary>
         /// Adds multiple expense entries in a single operation.

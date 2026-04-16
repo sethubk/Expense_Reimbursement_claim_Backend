@@ -3,8 +3,9 @@
     /// <summary>
     /// Represents travel details associated with a claim.
     /// </summary>
-    public class TravelDetailsDto
+    public class TravelInputDto
     {
+        public Guid Id { get; set; }
         /// <summary>
         /// Currency type used during travel (e.g., USD, EUR).
         /// </summary>
@@ -24,7 +25,6 @@
         /// Total number of travel days.
         /// </summary>
         public int TotalDays { get; set; }
-        public Guid TravelId { get; set; }
         /// <summary>
         /// Advance amount taken before travel.
         /// </summary>
@@ -38,6 +38,6 @@
         /// Reimbursement status (Pending, Settled, Rejected, etc.).
         /// </summary>
         public string ReimbursementStatus { get; set; } = string.Empty;
-        public List<CashInfoDto> CardCashEntries { get; set; } = new();
+        public List<CashInfoUpdateDto> CardCashEntries { get; set; } = new();
     }
 }

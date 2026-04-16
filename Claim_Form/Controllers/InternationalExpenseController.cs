@@ -61,25 +61,25 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Retrieves an international expense by its identifier.
         /// </summary>
-        /// <param name="internationalId">International expense identifier.</param>
+        /// <param name="ClaimID">International expense identifier.</param>
         /// <returns>International expense details.</returns>
         ///  Get api/International/ClaimID/international
-        [HttpGet("{internationalId}/international")]
+        [HttpGet("{ClaimID}/international")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetById([FromRoute] Guid internationalId)
+        public async Task<IActionResult> GetById([FromRoute] Guid ClaimID)
         {
-            if (internationalId == Guid.Empty)
+            if (ClaimID == Guid.Empty)
                 return BadRequest("Invalid international expense id.");
 
             try
             {
-                var expense = await _internationalService.GetInternationalAsync(internationalId);
+                var expense = await _internationalService.GetInternationalAsync(ClaimID);
 
                 if (expense == null)
-                    return NotFound($"No international expense found with id '{internationalId}'.");
+                    return NotFound($"No international expense found with id '{ClaimID}'.");
 
                 return Ok(expense);
             }

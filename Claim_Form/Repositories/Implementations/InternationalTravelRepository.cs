@@ -92,5 +92,36 @@ namespace Claim_Form.Repositories.Implementations
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.TravelId == travelId);
         }
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+        public async Task DeleteByTravelIdAsync(Guid travelId)
+        {
+            var travel = await _context.TravelDetails
+                .Include(t => t.CardCashEntries) 
+                .FirstOrDefaultAsync(t => t.TravelId == travelId);
+
+            if (travel == null)
+                return;
+
+            _context.TravelDetails.Remove(travel);
+            await _context.SaveChangesAsync();
+        }
+        public async Task DeleteCardCashEntriesAsync(Guid travelId)
+        {
+
+
+            var entries = await _context.CashInfos
+                        .Where(c => c.TravelDetails.TravelId == travelId)
+                        .ToListAsync();
+
+            if (!entries.Any())
+                return;
+
+            _context.CashInfos.RemoveRange(entries);
+
+           await _context.SaveChangesAsync();
+        }
     }
 }

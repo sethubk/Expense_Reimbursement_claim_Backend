@@ -84,8 +84,8 @@ namespace Claim_Form.Data
             modelBuilder.Entity<TravelDetails>()
                 .HasMany(td => td.CardCashEntries)
                 .WithOne(ci => ci.TravelDetails)
-                .HasForeignKey(ci => ci.TravelId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(ci => ci.TravelId);
+                
 
             // TravelDetails → International (One-to-Many)
             modelBuilder.Entity<TravelDetails>()

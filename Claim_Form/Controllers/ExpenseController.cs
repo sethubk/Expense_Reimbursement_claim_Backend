@@ -61,25 +61,25 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Retrieves an expense by its unique identifier.
         /// </summary>
-        /// <param name="ExpenseId">Expense identifier.</param>
+        /// <param name="ClaimID">Expense identifier.</param>
         /// <returns>Expense details.</returns>
         ///  // get api/Expense/ID/Expense
-        [HttpGet("{ExpenseId}/Expense")]
+        [HttpGet("{ClaimID}/Expense")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expense retrieved successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid expense id.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
-        public async Task<IActionResult> GetExpense([FromRoute] Guid ExpenseId)
+        public async Task<IActionResult> GetExpense([FromRoute] Guid ClaimID)
         {
-            if (ExpenseId == Guid.Empty)
+            if (ClaimID == Guid.Empty)
                 return BadRequest("Invalid expense id.");
 
             try
             {
-                var expense = await _expenseService.GetExpenseAsync(ExpenseId);
+                var expense = await _expenseService.GetExpenseAsync(ClaimID);
 
                 if (expense == null)
-                    return NotFound($"No expense found with id '{ExpenseId}'.");
+                    return NotFound($"No expense found with id '{ClaimID}'.");
 
                 return Ok(expense);
             }

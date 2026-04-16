@@ -3,6 +3,7 @@ using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using System.Security.Claims;
 
 namespace Claim_Form.Services.Implementations
 {
@@ -89,14 +90,14 @@ namespace Claim_Form.Services.Implementations
         /// <summary>
         /// Retrieves an international expense by its identifier.
         /// </summary>
-        public async Task<InternationalDto?> GetInternationalAsync(Guid id)
+        public async Task<InternationalDto?> GetInternationalAsync(Guid claimId)
         {
-            var model = await _internationalRepository.GetByIdAsync(id);
+            var model = await _recentClaimRepository.GetByIdAsync(claimId);
 
             if (model == null)
                 return null;
 
-            return _mapper.Map<InternationalDto>(model);
+            return _mapper.Map<InternationalDto>(model.TravelDetails.Internationals);
         }
 
         /// <summary>

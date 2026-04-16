@@ -106,7 +106,10 @@ namespace Claim_Form.Services.Implementations
             {
                 RecentClaimId = claim.RecentClaimId,
                 ClaimType = claim.Type,
-                ClaimStatus=claim.Status
+                ClaimStatus=claim.Status,
+                TotalAmount = claim.Amount,
+                Empcode=claim.Employee.EmpCode
+               
             };
 
             if (claim.Type == "Expense")
