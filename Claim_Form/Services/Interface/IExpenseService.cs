@@ -22,7 +22,7 @@ namespace Claim_Form.Services.Interface
         /// </summary>
         /// <param name="id">Expense identifier.</param>
         /// <returns>Expense details if found; otherwise null.</returns>
-        Task<ExpenseDto?> GetExpenseAsync(Guid id);
+        Task<List<ExpenseDto?>> GetExpenseAsync(Guid id);
 
         /// <summary>
         /// Updates an existing expense.

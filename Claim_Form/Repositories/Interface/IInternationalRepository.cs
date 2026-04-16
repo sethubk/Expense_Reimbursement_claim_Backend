@@ -25,6 +25,7 @@ namespace Claim_Form.Repositories.Interface
         /// </summary>
         /// <param name="id">International expense identifier.</param>
         Task DeleteAsync(Guid id);
+        Task DeleteExpenseAsync(Guid id);
 
         /// <summary>
         /// Adds multiple international expense entries in a single operation.

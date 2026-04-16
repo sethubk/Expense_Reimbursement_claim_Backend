@@ -87,14 +87,14 @@ namespace Claim_Form.Services.Implementations
         /// <summary>
         /// Retrieves an expense by its identifier.
         /// </summary>
-        public async Task<ExpenseDto?> GetExpenseAsync(Guid id)
+        public async Task<List<ExpenseDto?>> GetExpenseAsync(Guid id)
         {
             var expense = await _expenseRepository.GetByIdAsync(id);
 
             if (expense == null)
                 return null;
 
-            return _mapper.Map<ExpenseDto>(expense);
+            return _mapper.Map<List<ExpenseDto>>(expense);
         }
 
         /// <summary>
@@ -107,13 +107,13 @@ namespace Claim_Form.Services.Implementations
             if (expense == null)
                 return null;
 
-            expense.Date = dto.Date;
-            expense.SupportingNo = dto.SupportingNo;
-            expense.Particulars = dto.Particulars;
-            expense.PaymentMode = dto.PaymentMode;
-            expense.Amount = dto.Amount;
-            expense.Remarks = dto.Remarks;
-            expense.Screenshot = dto.Screenshot;
+            //expense.Date = dto.Date;
+            //expense.SupportingNo = dto.SupportingNo;
+            //expense.Particulars = dto.Particulars;
+            //expense.PaymentMode = dto.PaymentMode;
+            //expense.Amount = dto.Amount;
+            //expense.Remarks = dto.Remarks;
+            //expense.Screenshot = dto.Screenshot;
 
             //await _expenseRepository.UpdateAsync(expense);
 

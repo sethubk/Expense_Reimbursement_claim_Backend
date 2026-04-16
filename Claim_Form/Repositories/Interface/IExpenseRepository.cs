@@ -18,7 +18,7 @@ namespace Claim_Form.Repositories.Interface
         /// </summary>
         /// <param name="id">Expense identifier.</param>
         /// <returns>Expense if found; otherwise null.</returns>
-        Task<Expense?> GetByIdAsync(Guid id);
+        Task<IEnumerable<Expense>?> GetByIdAsync(Guid id);
 
         /// <summary>
         /// Updates an existing expense entry.

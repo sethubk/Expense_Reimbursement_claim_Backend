@@ -37,11 +37,11 @@ namespace Claim_Form.Repositories.Implementations
         /// </summary>
         /// <param name="id">Expense identifier.</param>
         /// <returns>Expense if found; otherwise null.</returns>
-        public async Task<Expense?> GetByIdAsync(Guid id)
+        public async Task<IEnumerable<Expense>?> GetByIdAsync(Guid id)
         {
             return await _context.Expenses
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.RecentClaimId == id);
+                .Where(e => e.RecentClaimId == id).ToListAsync();
         }
 
         /// <summary>

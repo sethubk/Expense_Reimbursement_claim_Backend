@@ -2,6 +2,7 @@
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Claim_Form.Repositories.Implementations
 {
@@ -66,6 +67,20 @@ namespace Claim_Form.Repositories.Implementations
 
             _context.Internationals.Remove(expense);
             await _context.SaveChangesAsync();
+        }
+        public async Task DeleteExpenseAsync(Guid id)
+        {
+
+            var travel = await _context.TravelDetails
+       .Include(t => t.Internationals)
+       .FirstOrDefaultAsync(t => t.RecentClaimId == id);
+
+            if (travel?.Internationals != null && travel.Internationals.Any())
+            {
+                _context.Internationals.RemoveRange(travel.Internationals);
+                await _context.SaveChangesAsync();
+            }
+
         }
     }
 }
