@@ -38,6 +38,8 @@ builder.Services.AddScoped<IDomesticRepository, DomesticRepository>();
 builder.Services.AddScoped<IDomesticService, DomesticService>();
 builder.Services.AddAutoMapper(typeof(Program));
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -98,7 +100,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseStaticFiles();
 app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
 

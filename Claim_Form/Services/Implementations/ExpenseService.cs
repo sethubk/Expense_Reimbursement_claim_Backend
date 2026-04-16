@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
+
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+
 
 namespace Claim_Form.Services.Implementations
 {
@@ -14,17 +16,18 @@ namespace Claim_Form.Services.Implementations
         private readonly IExpenseRepository _expenseRepository;
         private readonly IRecentClaimRepository _recentClaimRepository;
         private readonly IMapper _mapper;
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpenseService"/> class.
         /// </summary>
         public ExpenseService(
             IExpenseRepository expenseRepository,
-            IRecentClaimRepository recentClaimRepository,IMapper mapper)
+            IRecentClaimRepository recentClaimRepository,IMapper mapper, IHttpContextAccessor httpContextAccessor   )
         {
             _expenseRepository = expenseRepository;
             _recentClaimRepository = recentClaimRepository;
             _mapper = mapper;
+            _httpContextAccessor=httpContextAccessor;
         }
 
         /// <summary>
@@ -93,8 +96,17 @@ namespace Claim_Form.Services.Implementations
 
             if (expense == null)
                 return null;
+            var dtoList = _mapper.Map<List<ExpenseDto>>(expense);
 
-            return _mapper.Map<List<ExpenseDto>>(expense);
+            foreach (var dto in dtoList)
+            {
+                if (!string.IsNullOrEmpty(dto.Screenshot))
+                {
+                    dto.Screenshot = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/{dto.Screenshot}";
+                }
+            }
+    
+            return dtoList;
         }
 
         /// <summary>
