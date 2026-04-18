@@ -53,31 +53,41 @@ namespace Claim_Form.Repositories.Implementations
         public async Task<RecentClaim?> GetByIdAsync(Guid claimId)
         {
 
-            var claim = await _context.RecentClaims
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
+            //var claim = await _context.RecentClaims
 
-            if (claim == null)
-                return null;
+            //            .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
+
+            //if (claim == null)
+            //    return null;
 
 
 
+
+
+            //return await _context.RecentClaims
+
+            //        .Include(c=>c.Employee)
+            //        .Include(c => c.Expenses)
+            //        .Include(c => c.TravelDetails)
+            //        .ThenInclude(c => c.CardCashEntries)
+            //        .Include(c => c.TravelDetails)
+            //            .ThenInclude(t => t.Internationals)
+            //        .Include(c => c.TravelDetails)
+            //            .ThenInclude(t => t.Domestics)
+            //        .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
 
 
             return await _context.RecentClaims
-                    .AsNoTracking()
-                    .Include(c=>c.Employee)
-                    .Include(c => c.Expenses)
-                    .Include(c => c.TravelDetails)
-                    .ThenInclude(c => c.CardCashEntries)
-                    .Include(c => c.TravelDetails)
-                        .ThenInclude(t => t.Internationals)
-                    .Include(c => c.TravelDetails)
-                        .ThenInclude(t => t.Domestics)
-                    .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
-
-
-
+        .Include(c => c.Employee)
+        .Include(c => c.Expenses)
+        .Include(c => c.TravelDetails)
+            .ThenInclude(t => t.CardCashEntries)
+        .Include(c => c.TravelDetails)
+            .ThenInclude(t => t.Internationals)
+        .Include(c => c.TravelDetails)
+            .ThenInclude(t => t.Domestics)
+        .AsTracking() // 🔥 IMPORTANT
+        .FirstOrDefaultAsync(c => c.RecentClaimId == claimId);
 
         }
 
@@ -145,6 +155,11 @@ namespace Claim_Form.Repositories.Implementations
             return await _context.RecentClaims.Include(c => c.Employee).Where(c => c.Status =="pending")
 
                  .ToListAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

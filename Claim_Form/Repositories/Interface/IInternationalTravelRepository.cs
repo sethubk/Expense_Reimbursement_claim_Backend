@@ -42,8 +42,13 @@ namespace Claim_Form.Repositories.Interface
         /// <returns>Travel details if found; otherwise null.</returns>
         Task<TravelDetails?> GetByIdAsync(Guid travelId);
 
-        Task DeleteByTravelIdAsync(Guid travelId);
-        Task DeleteCardCashEntriesAsync(Guid travelId);
+        Task<CashInfo?> GetCashInfoByIdAsync(Guid id);
+
+        Task AddCashInfoAsync(CashInfo cash);
+
+        Task UpdateCashInfoAsync(CashInfo cash);
+
+        Task<bool> CashInfoExistsAsync(Guid id);
 
         Task SaveChangesAsync();
     }

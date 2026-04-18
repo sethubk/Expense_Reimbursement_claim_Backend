@@ -93,20 +93,20 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Updates an existing expense.
         /// </summary>
-        /// <param name="ExpenseId">Expense identifier.</param>
+        /// <param name="ClaimId">Expense identifier.</param>
         /// <param name="input">Ipdated expense data.</param>
         /// <returns>Updated expense.</returns>\
         ///  // Put api/recentClaim/ID/Expense
-        [HttpPut("{ExpenseId}/Expense")]
+        [HttpPut("{ClaimId}/Expense")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expense updated successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Expense not found.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Unexpected error.")]
         public async Task<IActionResult> UpdateExpense(
-            [FromRoute] Guid ExpenseId,
-            [FromBody] ExpenseDto input)
+            [FromRoute] Guid ClaimId,
+            [FromBody] List<ExpenseDto> input)
         {
-            if (ExpenseId == Guid.Empty)
+            if (ClaimId == Guid.Empty)
                 return BadRequest("Invalid expense id.");
 
             if (input == null)
@@ -114,10 +114,10 @@ namespace Claim_Form.Controllers
 
             try
             {
-                var updatedExpense = await _expenseService.UpdateExpenseAsync(ExpenseId, input);
+                    var updatedExpense = await _expenseService.UpdateExpenseAsync(ClaimId, input);
 
                 if (updatedExpense == null)
-                    return NotFound($"No expense found with id '{ExpenseId}'.");
+                    return NotFound($"No expense found with id '{ClaimId}'.");
 
                 return Ok(updatedExpense);
             }

@@ -27,7 +27,7 @@ namespace Claim_Form.Repositories.Interface
         /// <param name="claimId">Claim identifier.</param>
         /// <returns>Claim if found; otherwise null.</returns>
         Task<RecentClaim?> GetByIdAsync(Guid claimId);
-
+        Task SaveChangesAsync();
         /// <summary>
         /// Retrieves all claims for a specific employee by employee identifier.
         /// </summary>

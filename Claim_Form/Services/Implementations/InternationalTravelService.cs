@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Claim_Form.Data;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace Claim_Form.Services.Implementations
@@ -15,6 +17,7 @@ namespace Claim_Form.Services.Implementations
         private readonly IInternationalTravelRepository _travelRepository;
         private readonly IRecentClaimRepository _claimRepository;
         private readonly IMapper _mapper;
+        private readonly AppDbContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InternationalTravelService"/> class.
@@ -22,8 +25,11 @@ namespace Claim_Form.Services.Implementations
         public InternationalTravelService(
             IInternationalTravelRepository travelRepository,
             IRecentClaimRepository claimRepository,
-            IMapper mapper)
+            IMapper mapper,
+            AppDbContext context
+            )
         {
+            _context=context;
             _travelRepository = travelRepository;
             _claimRepository = claimRepository;
             _mapper = mapper;
@@ -42,7 +48,7 @@ namespace Claim_Form.Services.Implementations
 
             var travel = claim.TravelDetails;
 
-         
+            _context.ChangeTracker.Clear();
             if (travel == null)
             {
                 travel = new TravelDetails
@@ -66,43 +72,83 @@ namespace Claim_Form.Services.Implementations
                 await _travelRepository.AddAsync(travel);
                 return dto;
             }
-            //if (travel != null)
-            //{
-            //    if(travel.CardCashEntries==c)
-            //}
-            await _travelRepository.DeleteCardCashEntriesAsync(travel.TravelId);
-            var claim1 = await _claimRepository.GetByIdAsync(claimId);
-            if (claim1 == null)
-                throw new InvalidOperationException("Claim not found.");
+            // =========================
+            // UPDATE MASTER
+            // =========================
+            travel.CurrencyType = dto.CurrencyType;
+            travel.TravelStartDate = dto.TravelStartDate;
+            travel.TravelEndDate = dto.TravelEndDate;
+            travel.TotalDays = dto.TotalDays;
+            travel.AdvanceAmount = dto.AdvanceAmount;
 
-            var travel1 = claim1.TravelDetails;
+            var existingEntries = travel.CardCashEntries
+                .Where(x => !x.IsDeleted)
+                .ToList();
 
-            travel1.CurrencyType = dto.CurrencyType;
-            travel1.TravelStartDate = dto.TravelStartDate;
-            travel1.TravelEndDate = dto.TravelEndDate;
-            travel1.TotalDays = dto.TotalDays;
-            travel1.AdvanceAmount = dto.AdvanceAmount;
-            travel1.ReimbursementStatus = "Pending";
+            var incomingIds = dto.CardCashEntries
+                .Where(x => x.Id != null && x.Id != Guid.Empty)
+                .Select(x => x.Id.Value)
+                .ToList();
 
-          
-           
-
-            foreach (var entry in dto.CardCashEntries)
+            // =========================
+            // UPDATE + INSERT
+            // =========================
+            foreach (var item in dto.CardCashEntries)
             {
-               // var exiting = travel.CardCashEntries.FirstOrDefault(x=>x.Id == entry.)
-                travel1.CardCashEntries.Add(new CashInfo
+                if (item.Id != null && item.Id != Guid.Empty)
                 {
-                    LoadedDate = entry.LoadedDate,
-                    PaymentType = entry.PaymentType,
-                    InrRate = entry.InrRate,
-                    TotalLoadedAmount = entry.TotalLoadedAmount
-                });
+                    // ✅ ONLY USE TRACKED ENTITY
+                    var existing = existingEntries
+                        .FirstOrDefault(x => x.Id == item.Id);
+
+                    if (existing != null)
+                    {
+                        existing.LoadedDate = item.LoadedDate;
+                        existing.PaymentType = item.PaymentType;
+                        existing.InrRate = item.InrRate;
+                        existing.TotalLoadedAmount = item.TotalLoadedAmount;
+
+                        existing.ModifiedAt = DateTime.UtcNow;
+                        existing.ModifiedBy = "SYSTEM";
+                    }
+                }
+                else
+                {
+                    // ✅ INSERT
+                    travel.CardCashEntries.Add(new CashInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        TravelId = travel.TravelId, // MUST
+                        LoadedDate = item.LoadedDate,
+                        PaymentType = item.PaymentType,
+                        InrRate = item.InrRate,
+                        TotalLoadedAmount = item.TotalLoadedAmount,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = "SYSTEM"
+                    });
+                }
             }
 
-           
-            await _travelRepository.UpdateAsync(travel1);
+            // =========================
+            // SOFT DELETE
+            // =========================
+            var toDelete = existingEntries
+                .Where(x => !incomingIds.Contains(x.Id))
+                .ToList();
 
-            return _mapper.Map<TravelDetailsDto>(travel1);
+            foreach (var item in toDelete)
+            {
+                item.IsDeleted = true;
+                item.DeletedAt = DateTime.UtcNow;
+                item.DeletedBy = "SYSTEM";
+            }
+
+            // =========================
+            // SAVE
+            // =========================
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<TravelDetailsDto>(travel);
         }
 
         // ✅ Return updated DTO

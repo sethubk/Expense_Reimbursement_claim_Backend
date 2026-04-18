@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents cash or card loading information associated with travel details.
     /// </summary>
-    public class CashInfo
+    public class CashInfo:AuditInfo
     {
         /// <summary>
         /// Unique identifier for the cash information record.

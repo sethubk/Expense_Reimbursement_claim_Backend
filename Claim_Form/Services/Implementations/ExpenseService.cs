@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Claim_Form.Data;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
 
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 
 namespace Claim_Form.Services.Implementations
@@ -17,16 +20,19 @@ namespace Claim_Form.Services.Implementations
         private readonly IRecentClaimRepository _recentClaimRepository;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly AppDbContext _context;
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpenseService"/> class.
         /// </summary>
         public ExpenseService(
             IExpenseRepository expenseRepository,
+            AppDbContext context,
             IRecentClaimRepository recentClaimRepository,IMapper mapper, IHttpContextAccessor httpContextAccessor   )
         {
             _expenseRepository = expenseRepository;
             _recentClaimRepository = recentClaimRepository;
             _mapper = mapper;
+            _context=context;
             _httpContextAccessor=httpContextAccessor;
         }
 
@@ -67,24 +73,7 @@ namespace Claim_Form.Services.Implementations
             }
 
            
-            //var existingExpenses = claim.Expenses.ToList();
-
-            //for (int i = 0; i < existingExpenses.Count && i < entries.Count; i++)
-            //{
-            //    existingExpenses[i].Id=claim.Expenses.
-            //    existingExpenses[i].Date = entries[i].Date;
-            //    existingExpenses[i].SupportingNo = entries[i].SupportingNo;
-            //    existingExpenses[i].Particulars = entries[i].Particulars;
-            //    existingExpenses[i].PaymentMode = entries[i].PaymentMode;
-            //    existingExpenses[i].Amount = entries[i].Amount;
-            //    existingExpenses[i].Remarks = entries[i].Remarks;
-            //    existingExpenses[i].Screenshot = entries[i].Screenshot ?? string.Empty;
-            //}
-
-            //await _expenseRepository.UpdateAsync(existingExpenses);
-
-            //return _mapper.Map<List<ExpenseDto>>(existingExpenses);
-        
+          
 
 
         /// <summary>
@@ -102,36 +91,208 @@ namespace Claim_Form.Services.Implementations
             {
                 if (!string.IsNullOrEmpty(dto.Screenshot))
                 {
-                    dto.Screenshot = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/{dto.Screenshot}";
+                    // Only modify if it's NOT base64
+                    if (!dto.Screenshot.StartsWith("data:image"))
+                    {
+                        dto.Screenshot = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/{dto.Screenshot}";
+                    }
                 }
             }
-    
+
             return dtoList;
         }
 
         /// <summary>
         /// Updates an existing expense.
         /// </summary>
-        public async Task<ExpenseDto?> UpdateExpenseAsync(Guid id, ExpenseDto dto)
+        //public async Task<bool> UpdateExpenseAsync(Guid claimId, List<ExpenseDto> expenses)
+        //{
+        //    // 🔥 Always load with tracking
+        //    var claim = await _context.RecentClaims
+        //        .Include(x => x.Expenses)
+        //        .FirstOrDefaultAsync(x => x.RecentClaimId == claimId);
+
+        //    if (claim == null)
+        //        throw new Exception("Claim not found");
+
+        //    var existingExpenses = claim.Expenses
+        //        .Where(x => !x.IsDeleted)
+        //        .ToList();
+
+        //    // =========================
+        //    // GET IDS FROM FRONTEND
+        //    // =========================
+        //    var incomingIds = expenses
+        //        .Where(x => x.Id.HasValue && x.Id != Guid.Empty)
+        //        .Select(x => x.Id.Value)
+        //        .ToList();
+
+        //    // =========================
+        //    // 1️⃣ UPDATE + INSERT
+        //    // =========================
+        //    foreach (var dto in expenses)
+        //    {
+        //        if (dto.Id.HasValue && dto.Id != Guid.Empty)
+        //        {
+        //            // 🔥 SAFE FETCH FROM DB (avoid concurrency issue)
+        //            var exp = await _context.Expenses
+        //                .FirstOrDefaultAsync(x => x.Id == dto.Id);
+
+        //            if (exp == null) continue; // skip if already deleted
+
+        //            exp.Date = dto.Date;
+        //            exp.SupportingNo = dto.SupportingNo;
+        //            exp.Particulars = dto.Particulars;
+        //            exp.PaymentMode = dto.PaymentMode;
+        //            exp.Amount = dto.Amount;
+        //            exp.Remarks = dto.Remarks;
+        //            exp.Screenshot = dto.Screenshot;
+
+        //            exp.ModifiedAt = DateTime.UtcNow;
+        //            exp.ModifiedBy = "SYSTEM";
+
+        //            _context.Expenses.Update(exp); // 🔥 IMPORTANT
+        //        }
+        //        else
+        //        {
+        //            // INSERT
+        //            var newExpense = new Expense
+        //            {
+
+        //                RecentClaimId = claimId,
+        //                Date = dto.Date,
+        //                SupportingNo = dto.SupportingNo,
+        //                Particulars = dto.Particulars,
+        //                PaymentMode = dto.PaymentMode,
+        //                Amount = dto.Amount,
+        //                Remarks = dto.Remarks,
+        //                Screenshot = dto.Screenshot,
+        //                CreatedAt = DateTime.UtcNow,
+
+        //            };
+
+        //            _context.Expenses.Add(newExpense);
+        //        }
+        //    }
+
+        //    // =========================
+        //    // 2️⃣ SOFT DELETE
+        //    // =========================
+        //    var toDelete = existingExpenses
+        //        .Where(x => !incomingIds.Contains(x.Id))
+        //        .ToList();
+
+        //    foreach (var exp in toDelete)
+        //    {
+        //        var exists = await _context.Expenses
+        //            .AsNoTracking()
+        //            .AnyAsync(x => x.Id == exp.Id);
+
+        //        if (!exists) continue; // 🔥 avoid concurrency crash
+
+        //        exp.IsDeleted = true;
+        //        exp.DeletedAt = DateTime.UtcNow;
+
+
+        //        _context.Expenses.Update(exp); // 🔥 IMPORTANT
+        //    }
+
+        //    // =========================
+        //    // SAVE
+        //    // =========================
+        //    await _context.SaveChangesAsync();
+
+        //    return true;
+        //}
+        public async Task<bool> UpdateExpenseAsync(Guid claimId, List<ExpenseDto> expenses)
         {
-            var expense = await _expenseRepository.GetByIdAsync(id);
+            // 🔥 Always load with tracking
+            var claim = await _recentClaimRepository.GetByIdAsync(claimId);
 
-            if (expense == null)
-                return null;
+            if (claim == null)
+                throw new Exception("Claim not found");
 
-            //expense.Date = dto.Date;
-            //expense.SupportingNo = dto.SupportingNo;
-            //expense.Particulars = dto.Particulars;
-            //expense.PaymentMode = dto.PaymentMode;
-            //expense.Amount = dto.Amount;
-            //expense.Remarks = dto.Remarks;
-            //expense.Screenshot = dto.Screenshot;
+            var existingExpenses = claim.Expenses
+                .Where(x => !x.IsDeleted)
+                .ToList();
 
-            //await _expenseRepository.UpdateAsync(expense);
+            // =========================
+            // GET IDS FROM FRONTEND
+            // =========================
+            var incomingIds = expenses
+                .Where(x => x.Id.HasValue && x.Id != Guid.Empty)
+                .Select(x => x.Id.Value)
+                .ToList();
 
-            return dto;
+            // =========================
+            // 1️⃣ UPDATE + INSERT
+            // =========================
+            foreach (var dto in expenses)
+            {
+                if (dto.Id.HasValue && dto.Id != Guid.Empty)
+                {
+                    var exp = await _expenseRepository.GetById(dto.Id.Value);
+
+                    if (exp == null) continue;
+
+                    exp.Date = dto.Date;
+                    exp.SupportingNo = dto.SupportingNo;
+                    exp.Particulars = dto.Particulars;
+                    exp.PaymentMode = dto.PaymentMode;
+                    exp.Amount = dto.Amount;
+                    exp.Remarks = dto.Remarks;
+                    exp.Screenshot = dto.Screenshot;
+
+                    exp.ModifiedAt = DateTime.UtcNow;
+                    exp.ModifiedBy = "SYSTEM";
+
+                    await _expenseRepository.UpdateAsync(exp);
+                }
+                else
+                {
+                    var newExpense = new Expense
+                    {
+                        Id = Guid.NewGuid(), // ✅ IMPORTANT
+                        RecentClaimId = claimId,
+                        Date = dto.Date,
+                        SupportingNo = dto.SupportingNo,
+                        Particulars = dto.Particulars,
+                        PaymentMode = dto.PaymentMode,
+                        Amount = dto.Amount,
+                        Remarks = dto.Remarks,
+                        Screenshot = dto.Screenshot,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _expenseRepository.AddAsync(newExpense);
+                }
+            }
+
+            // =========================
+            // SOFT DELETE
+            // =========================
+            foreach (var exp in existingExpenses)
+            {
+                if (!incomingIds.Contains(exp.Id))
+                {
+                    var exists = await _expenseRepository.ExistsAsync(exp.Id);
+
+                    if (!exists) continue;
+
+                    exp.IsDeleted = true;
+                    exp.DeletedAt = DateTime.UtcNow;
+
+                    await _expenseRepository.UpdateAsync(exp);
+                }
+            }
+
+            // =========================
+            // SAVE
+            // =========================
+            await _expenseRepository.SaveChangesAsync();
+
+            return true;
         }
-
         /// <summary>
         /// Deletes an expense by its identifier.
         /// </summary>

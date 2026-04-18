@@ -30,7 +30,7 @@ namespace Claim_Form.Services.Interface
         /// <param name="id">Expense identifier.</param>
         /// <param name="dto">Updated expense details.</param>
         /// <returns>Updated expense details if found; otherwise null.</returns>
-        Task<ExpenseDto?> UpdateExpenseAsync(Guid id, ExpenseDto dto);
+        Task<bool> UpdateExpenseAsync(Guid claimId, List<ExpenseDto> expenses);
 
         /// <summary>
         /// Deletes an expense by its identifier.

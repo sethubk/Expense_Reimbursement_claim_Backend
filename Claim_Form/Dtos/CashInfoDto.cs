@@ -1,14 +1,17 @@
-﻿namespace Claim_Form.Dtos
+﻿using Claim_Form.Entities;
+
+namespace Claim_Form.Dtos
 {
     /// <summary>
     /// Represents cash or card loading information for travel expenses.
     /// </summary>
-    public class CashInfoDto
+    public class CashInfoDto:AuditInfo
     {
         /// <summary>
         /// Date when the cash/card amount was loaded.
         /// </summary>
-        public DateOnly LoadedDate { get; set; }
+         public Guid? Id { get; set; } 
+        public DateOnly LoadedDate { get; set; }    
 
         /// <summary>
         /// Type of payment method (Cash/Card).

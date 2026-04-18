@@ -26,11 +26,7 @@ namespace Claim_Form.Repositories.Implementations
         /// Adds a new expense entry.
         /// </summary>
         /// <param name="expense">Expense entity.</param>
-        public async Task AddAsync(Expense expense)
-        {
-            _context.Expenses.Add(expense);
-            await _context.SaveChangesAsync();
-        }
+      
 
         /// <summary>
         /// Retrieves an expense by its identifier.
@@ -71,6 +67,34 @@ namespace Claim_Form.Repositories.Implementations
 
         }
 
+        public async Task<Expense?> GetById(Guid id)
+        {
+            return await _context.Expenses
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task AddAsync(Expense expense)
+        {
+            await _context.Expenses.AddAsync(expense);
+        }
+
+        public async Task UpdateAsync(Expense expense)
+        {
+            _context.Expenses.Update(expense);
+            await Task.CompletedTask;
+        }
+
+        public async Task<bool> ExistsAsync(Guid id)
+        {
+            return await _context.Expenses
+                .AsNoTracking()
+                .AnyAsync(x => x.Id == id);
+        }
+
+        public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 
         /// <summary>
         /// Adds multiple expense entries in a single operation.

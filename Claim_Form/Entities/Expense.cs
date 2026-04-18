@@ -5,7 +5,7 @@ namespace Claim_Form.Entities
     /// <summary>
     /// Represents an expense entry associated with a claim.
     /// </summary>
-    public class Expense
+    public class Expense:AuditInfo
     {
         /// <summary>
         /// Unique identifier for the expense.

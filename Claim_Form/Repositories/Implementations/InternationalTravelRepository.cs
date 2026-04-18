@@ -77,7 +77,7 @@ namespace Claim_Form.Repositories.Implementations
             return await _context.TravelDetails
                 .Include(t => t.CardCashEntries)
                 .Include(t => t.Internationals)
-                .AsNoTracking()
+                
                 .FirstOrDefaultAsync(t => t.RecentClaim.RecentClaimId == claimId);
         }
 
@@ -92,36 +92,37 @@ namespace Claim_Form.Repositories.Implementations
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.TravelId == travelId);
         }
+
+        public async Task<CashInfo?> GetCashInfoByIdAsync(Guid id)
+        {
+            return await _context.CashInfos
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task AddCashInfoAsync(CashInfo cash)
+        {
+            await _context.CashInfos.AddAsync(cash);
+        }
+
+        public Task UpdateCashInfoAsync(CashInfo cash)
+        {
+            _context.CashInfos.Update(cash);
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> CashInfoExistsAsync(Guid id)
+        {
+            return await _context.CashInfos
+                .AsNoTracking()
+                .AnyAsync(x => x.Id == id);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
-        public async Task DeleteByTravelIdAsync(Guid travelId)
-        {
-            var travel = await _context.TravelDetails
-                .Include(t => t.CardCashEntries) 
-                .FirstOrDefaultAsync(t => t.TravelId == travelId);
-
-            if (travel == null)
-                return;
-
-            _context.TravelDetails.Remove(travel);
-            await _context.SaveChangesAsync();
-        }
-        public async Task DeleteCardCashEntriesAsync(Guid travelId)
-        {
 
 
-            var entries = await _context.CashInfos
-                        .Where(c => c.TravelDetails.TravelId == travelId)
-                        .ToListAsync();
-
-            if (!entries.Any())
-                return;
-
-            _context.CashInfos.RemoveRange(entries);
-
-           await _context.SaveChangesAsync();
-        }
+       
     }
 }

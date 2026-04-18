@@ -8,6 +8,8 @@
         /// <summary>
         /// Date on which the expense was incurred.
         /// </summary>
+        /// 
+        public Guid? Id { get; set; }
         public DateOnly Date { get; set; }
 
         /// <summary>

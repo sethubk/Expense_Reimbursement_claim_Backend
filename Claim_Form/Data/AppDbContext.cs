@@ -1,4 +1,5 @@
 ﻿using Claim_Form.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Claim_Form.Data
@@ -7,13 +8,17 @@ namespace Claim_Form.Data
     /// Application database context responsible for
     /// managing entity models and relationships.
     /// </summary>
+     
     public class AppDbContext : DbContext
     {
-      
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor httpContextAccessor)
             : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
+       
 
         #region DbSets
 
@@ -73,6 +78,9 @@ namespace Claim_Form.Data
                 .HasForeignKey(e => e.RecentClaimId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Expense>()
+    .HasQueryFilter(e => !e.IsDeleted);
+
             // RecentClaim → TravelDetails (One-to-One)
             modelBuilder.Entity<RecentClaim>()
                 .HasOne(rc => rc.TravelDetails)
@@ -99,6 +107,40 @@ namespace Claim_Form.Data
                .WithOne(i => i.TravelDetails)
                .HasForeignKey(i => i.TravelId)
                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // 👇 HERE is where you use it
+            var user = _httpContextAccessor.HttpContext?
+                .User?.FindFirst("EmpCode")?.Value
+                ?? "SYSTEM";
+
+            foreach (var entry in ChangeTracker.Entries<AuditInfo>())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.CreatedAt = DateTime.UtcNow;
+                        entry.Entity.CreatedBy = user;
+                        break;
+
+                    case EntityState.Modified:
+                        entry.Entity.ModifiedAt = DateTime.UtcNow;
+                        entry.Entity.ModifiedBy = user;
+                        break;
+
+                    //case EntityState.Deleted:
+                    //    entry.State = EntityState.Modified;
+                    //    entry.Entity.IsDeleted = true;
+                    //    entry.Entity.DeletedAt = DateTime.UtcNow;
+                    //    entry.Entity.DeletedBy = user;
+                    //    break;
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }
