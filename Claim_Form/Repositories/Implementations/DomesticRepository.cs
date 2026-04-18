@@ -39,9 +39,26 @@ namespace Claim_Form.Repositories.Implementations
         /// Updates an existing international expense entry.
         /// </summary>
         /// <param name="expense">International expense entity.</param>
-        public async Task UpdateAsync(Domestic expense)
+        public async Task AddAsync(Domestic entity)
         {
-            _context.Domestics.Update(expense);
+            await _context.Domestics.AddAsync(entity);
+        }
+
+        // =========================
+        // UPDATE (SAFE TRACKING)
+        // =========================
+        public Task UpdateAsync(Domestic entity)
+        {
+            _context.Entry(entity).State = EntityState.Modified;
+            return Task.CompletedTask;
+        }
+
+
+        // =========================
+        // SAVE
+        // =========================
+        public async Task SaveChangesAsync()
+        {
             await _context.SaveChangesAsync();
         }
 

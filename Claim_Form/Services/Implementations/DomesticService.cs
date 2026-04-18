@@ -95,14 +95,14 @@ namespace Claim_Form.Services.Implementations
         /// <summary>
         /// Retrieves an international expense by its identifier.
         /// </summary>
-        public async Task<DomesticDto?> GetDomesticAsync(Guid id)
+        public async Task<List<DomesticDto?>> GetDomesticAsync(Guid id)
         {
-            var model = await _domesticrepository.GetByIdAsync(id);
+            var model = await _recentClaimRepository.GetByIdAsync(id);
 
             if (model == null)
                 return null;
 
-            return _mapper.Map<DomesticDto>(model);
+            return _mapper.Map<List<DomesticDto>>(model.TravelDetails.Domestics);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Claim_Form.Services.Implementations
         /// </summary>
         public async Task<bool> UpdateDomesticAsync(
             Guid id,
-            List<DomesticDto> dtoList)
+            List<ExpenseDto> dtoList)
         {
             var claim = await _recentClaimRepository.GetByIdAsync(id);
 
@@ -120,11 +120,8 @@ namespace Claim_Form.Services.Implementations
             var travel = claim.TravelDetails;
 
             if (travel == null)
-                throw new Exception("Travel details not found");
+                throw new Exception("Travel not found");
 
-            // =========================
-            // EXISTING DATA
-            // =========================
             var existing = travel.Domestics
                 .Where(x => !x.IsDeleted)
                 .ToList();
@@ -149,18 +146,23 @@ namespace Claim_Form.Services.Implementations
                         entity.SupportingNo = dto.SupportingNo;
                         entity.Particulars = dto.Particulars;
                         entity.PaymentMode = dto.PaymentMode;
+                     
                         entity.Amount = dto.Amount;
+                       
                         entity.Remarks = dto.Remarks;
                         entity.Screenshot = dto.Screenshot;
+
                         entity.ModifiedAt = DateTime.UtcNow;
                         entity.ModifiedBy = "SYSTEM";
 
                         entity.IsDeleted = false;
+
+                        await _domesticrepository.UpdateAsync(entity);
                     }
                 }
                 else
                 {
-                    travel.Domestics.Add(new Domestic
+                    var newEntity = new Domestic
                     {
                         Id = Guid.NewGuid(),
                         TravelId = travel.TravelId,
@@ -168,13 +170,17 @@ namespace Claim_Form.Services.Implementations
                         SupportingNo = dto.SupportingNo,
                         Particulars = dto.Particulars,
                         PaymentMode = dto.PaymentMode,
+                        
                         Amount = dto.Amount,
+                     
                         Remarks = dto.Remarks,
                         Screenshot = dto.Screenshot,
                         CreatedAt = DateTime.UtcNow,
                         CreatedBy = "SYSTEM",
                         IsDeleted = false
-                    });
+                    };
+
+                    await _domesticrepository.AddAsync(newEntity);
                 }
             }
 
@@ -190,12 +196,38 @@ namespace Claim_Form.Services.Implementations
                 item.IsDeleted = true;
                 item.DeletedAt = DateTime.UtcNow;
                 item.DeletedBy = "SYSTEM";
+
+                await _domesticrepository.UpdateAsync(item);
             }
 
             // =========================
-            // SAVE ONLY ONCE (IMPORTANT)
+            // SINGLE SAVE CALL
             // =========================
-            await _recentClaimRepository.SaveChangesAsync();
+            await _domesticrepository.SaveChangesAsync();
+
+            var updatedTravel = await _recentClaimRepository.GetByIdAsync(id);
+
+            var totalExpense = updatedTravel.TravelDetails.Domestics
+                .Where(x => !x.IsDeleted)
+                .Sum(x => x.Amount);
+
+            var advanceAmount = updatedTravel.TravelDetails.AdvanceAmount;
+
+            decimal difference = totalExpense - advanceAmount;
+
+            string reimbursementStatus =
+                difference > 0
+                    ? $"Amount Payable to Employee: ₹{difference}"
+                : difference < 0
+                    ? $"Amount Recover from Employee: ₹{Math.Abs(difference)}"
+                : "Settled";
+
+            // =========================
+            // UPDATE TRAVEL DETAILS
+            // =========================
+            updatedTravel.TravelDetails.ReimbursementStatus = reimbursementStatus;
+
+            await _internationalTravelRepository.SaveChangesAsync();
 
             return true;
         }

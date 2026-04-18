@@ -105,10 +105,10 @@ namespace Claim_Form.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(
-            [FromRoute] Guid cliamid,
-            [FromBody] List<DomesticDto> input)
+            [FromRoute] Guid claimId,
+            [FromBody] List<ExpenseDto> input)
         {
-            if (cliamid == Guid.Empty)
+            if (claimId == Guid.Empty)
                 return BadRequest("Invalid international expense id.");
 
             if (input == null)
@@ -116,10 +116,10 @@ namespace Claim_Form.Controllers
 
             try
             {
-                var updated = await _domesticService.UpdateDomesticAsync(cliamid, input);
+                var updated = await _domesticService.UpdateDomesticAsync(claimId, input);
 
                 if (updated == null)
-                    return NotFound($"No international expense found with id '{cliamid}'.");
+                    return NotFound($"No international expense found with id '{claimId}'.");
 
                 return Ok(updated);
             }

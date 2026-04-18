@@ -15,8 +15,9 @@ namespace Claim_Form.Repositories.Interface
         /// Updates an existing international expense.
         /// </summary>
         /// <param name="expense">International expense entity.</param>
-        Task UpdateAsync(Domestic expense);
-
+        Task AddAsync(Domestic entity);
+        Task UpdateAsync(Domestic entity);
+        Task SaveChangesAsync();
         /// <summary>
         /// Deletes an international expense by its identifier.
         /// </summary>
