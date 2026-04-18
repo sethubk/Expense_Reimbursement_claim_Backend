@@ -46,9 +46,9 @@ namespace Claim_Form.Services.Interface
         /// <returns>
         /// The updated domestic expense DTO if the update was successful; otherwise, null.
         /// </returns>
-        Task<DomesticDto?> UpdateDomesticAsync(
+        Task<bool> UpdateDomesticAsync(
             Guid id,
-            DomesticDto dto);
+           List<DomesticDto> dtoList);
 
         /// <summary>
         /// Deletes a domestic expense by its identifier.

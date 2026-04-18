@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
+
 using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
@@ -106,28 +107,128 @@ namespace Claim_Form.Services.Implementations
         /// <summary>
         /// Updates an existing international expense.
         /// </summary>
-        public async Task<InternationalDto?> UpdateInternationalAsync(
-            Guid id,
-            InternationalDto dto)
+        public async Task<bool> UpdateInternationalAsync(
+         Guid claimId,
+         List<InternationalDto> dtoList)
         {
-            var model = await _internationalRepository.GetByIdAsync(id);
+            var claim = await _recentClaimRepository.GetByIdAsync(claimId);
 
-            if (model == null)
-                return null;
+            if (claim == null)
+                throw new Exception("Claim not found");
 
-            model.Date = dto.Date;
-            model.SupportingNo = dto.SupportingNo;
-            model.Particulars = dto.Particulars;
-            model.PaymentMode = dto.PaymentMode;
-            model.CurrencyType = dto.CurrencyType;
-            model.Amount = dto.Amount;
-            model.ConvertedAmount = dto.ConvertedAmount;
-            model.Remarks = dto.Remarks;
-            model.Screenshot = dto.Screenshot;
+            var travel = claim.TravelDetails;
 
-          await _internationalRepository.UpdateAsync(model);
+            if (travel == null)
+                throw new Exception("Travel not found");
 
-            return dto;
+            var existing = travel.Internationals
+                .Where(x => !x.IsDeleted)
+                .ToList();
+
+            var incomingIds = dtoList
+                .Where(x => x.Id.HasValue && x.Id != Guid.Empty)
+                .Select(x => x.Id.Value)
+                .ToList();
+
+            // =========================
+            // UPDATE + INSERT
+            // =========================
+            foreach (var dto in dtoList)
+            {
+                if (dto.Id.HasValue && dto.Id != Guid.Empty)
+                {
+                    var entity = existing.FirstOrDefault(x => x.Id == dto.Id);
+
+                    if (entity != null)
+                    {
+                        entity.Date = dto.Date;
+                        entity.SupportingNo = dto.SupportingNo;
+                        entity.Particulars = dto.Particulars;
+                        entity.PaymentMode = dto.PaymentMode;
+                        entity.CurrencyType = dto.CurrencyType;
+                        entity.Amount = dto.Amount;
+                        entity.ConvertedAmount = dto.ConvertedAmount;
+                        entity.Remarks = dto.Remarks;
+                        entity.Screenshot = dto.Screenshot;
+
+                        entity.ModifiedAt = DateTime.UtcNow;
+                        entity.ModifiedBy = "SYSTEM";
+
+                        entity.IsDeleted = false;
+
+                        await _internationalRepository.UpdateAsync(entity);
+                    }
+                }
+                else
+                {
+                    var newEntity = new International
+                    {
+                        Id = Guid.NewGuid(),
+                        TravelId = travel.TravelId,
+                        Date = dto.Date,
+                        SupportingNo = dto.SupportingNo,
+                        Particulars = dto.Particulars,
+                        PaymentMode = dto.PaymentMode,
+                        CurrencyType = dto.CurrencyType,
+                        Amount = dto.Amount,
+                        ConvertedAmount = dto.ConvertedAmount,
+                        Remarks = dto.Remarks,
+                        Screenshot = dto.Screenshot,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = "SYSTEM",
+                        IsDeleted = false
+                    };
+
+                    await _internationalRepository.AddAsync(newEntity);
+                }
+            }
+
+            // =========================
+            // SOFT DELETE
+            // =========================
+            var toDelete = existing
+                .Where(x => !incomingIds.Contains(x.Id))
+                .ToList();
+
+            foreach (var item in toDelete)
+            {
+                item.IsDeleted = true;
+                item.DeletedAt = DateTime.UtcNow;
+                item.DeletedBy = "SYSTEM";
+
+                await _internationalRepository.UpdateAsync(item);
+            }
+
+            // =========================
+            // SINGLE SAVE CALL
+            // =========================
+            await _internationalRepository.SaveChangesAsync();
+
+            var updatedTravel = await _recentClaimRepository.GetByIdAsync(claimId);
+
+            var totalExpense = updatedTravel.TravelDetails.Internationals
+                .Where(x => !x.IsDeleted)
+                .Sum(x => x.ConvertedAmount);
+
+            var advanceAmount = updatedTravel.TravelDetails.AdvanceAmount;
+
+            decimal difference = totalExpense - advanceAmount;
+
+            string reimbursementStatus =
+                difference > 0
+                    ? $"Amount Payable to Employee: ₹{difference}"
+                : difference < 0
+                    ? $"Amount Recover from Employee: ₹{Math.Abs(difference)}"
+                : "Settled";
+
+            // =========================
+            // UPDATE TRAVEL DETAILS
+            // =========================
+            updatedTravel.TravelDetails.ReimbursementStatus = reimbursementStatus;
+
+            await _internationalTravelRepository.SaveChangesAsync();
+
+            return true;
         }
 
         /// <summary>

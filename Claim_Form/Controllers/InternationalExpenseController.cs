@@ -94,20 +94,20 @@ namespace Claim_Form.Controllers
         /// <summary>
         /// Updates an existing international expense.
         /// </summary>
-        /// <param name="internationalId">International expense identifier.</param>
+        /// <param name="ClaimId">International expense identifier.</param>
         /// <param name="input">Updated international expense data.</param>
         /// <returns>Updated international expense.</returns>
         ///  Put api/International/ClaimID/international
-        [HttpPut("{internationalId}/international")]
+        [HttpPut("{ClaimId}/International")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(
-            [FromRoute] Guid internationalId,
-            [FromBody] InternationalDto input)
+            [FromRoute] Guid ClaimId,
+            [FromBody] List<InternationalDto> input)
         {
-            if (internationalId == Guid.Empty)
+            if (ClaimId == Guid.Empty)
                 return BadRequest("Invalid international expense id.");
 
             if (input == null)
@@ -115,10 +115,10 @@ namespace Claim_Form.Controllers
 
             try
             {
-                var updated = await _internationalService.UpdateInternationalAsync(internationalId, input);
+                var updated = await _internationalService.UpdateInternationalAsync(ClaimId, input);
 
                 if (updated == null)
-                    return NotFound($"No international expense found with id '{internationalId}'.");
+                    return NotFound($"No international expense found with id '{ClaimId}'.");
 
                 return Ok(updated);
             }

@@ -5,7 +5,7 @@ namespace Claim_Form.Entities
     /// <summary>
     /// Represents an international expense associated with travel details.
     /// </summary>
-    public class International
+    public class International:AuditInfo
     {
         /// <summary>
         /// Unique identifier for the international expense.

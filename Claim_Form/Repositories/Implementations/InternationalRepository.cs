@@ -48,11 +48,11 @@ namespace Claim_Form.Repositories.Implementations
         /// Updates an existing international expense entry.
         /// </summary>
         /// <param name="expense">International expense entity.</param>
-        public async Task UpdateAsync(International expense)
-        {
-            _context.Internationals.Update(expense);
-            await _context.SaveChangesAsync();
-        }
+        //public async Task UpdateAsync(International expense)
+        //{
+        //    _context.Internationals.Update(expense);
+        //    await _context.SaveChangesAsync();
+        //}
 
         /// <summary>
         /// Deletes an international expense by its identifier.
@@ -81,6 +81,37 @@ namespace Claim_Form.Repositories.Implementations
                 await _context.SaveChangesAsync();
             }
 
+        }
+
+        public async Task<International?> GetById(Guid id)
+        {
+            return await _context.Internationals
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        // =========================
+        // ADD
+        // =========================
+        public async Task AddAsync(International entity)
+        {
+            await _context.Internationals.AddAsync(entity);
+        }
+
+        // =========================
+        // UPDATE (SAFE TRACKING)
+        // =========================
+        public Task UpdateAsync(International entity)
+        {
+            _context.Entry(entity).State = EntityState.Modified;
+            return Task.CompletedTask;
+        }
+
+        // =========================
+        // SAVE
+        // =========================
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

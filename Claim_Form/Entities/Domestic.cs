@@ -2,7 +2,7 @@
 
 namespace Claim_Form.Entities
 {
-    public class Domestic
+    public class Domestic:AuditInfo
     {
         [Key]
         public Guid Id { get; set; }

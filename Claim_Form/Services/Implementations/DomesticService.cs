@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
+using Claim_Form.Migrations;
 using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
+using System.Diagnostics;
+using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Claim_Form.Services.Implementations
@@ -105,26 +108,96 @@ namespace Claim_Form.Services.Implementations
         /// <summary>
         /// Updates an existing international expense.
         /// </summary>
-        public async Task<DomesticDto?> UpdateDomesticAsync(
+        public async Task<bool> UpdateDomesticAsync(
             Guid id,
-            DomesticDto dto)
+            List<DomesticDto> dtoList)
         {
-            var model = await _domesticrepository.GetByIdAsync(id);
+            var claim = await _recentClaimRepository.GetByIdAsync(id);
 
-            if (model == null)
-                return null;
+            if (claim == null)
+                throw new Exception("Claim not found");
 
-            model.Date = dto.Date;
-            model.SupportingNo = dto.SupportingNo;
-            model.Particulars = dto.Particulars;
-            model.PaymentMode = dto.PaymentMode;
-            model.Amount = dto.Amount;
-            model.Remarks = dto.Remarks;
-            model.Screenshot = dto.Screenshot;
+            var travel = claim.TravelDetails;
 
-            await _domesticrepository.UpdateAsync(model);
+            if (travel == null)
+                throw new Exception("Travel details not found");
 
-            return dto;
+            // =========================
+            // EXISTING DATA
+            // =========================
+            var existing = travel.Domestics
+                .Where(x => !x.IsDeleted)
+                .ToList();
+
+            var incomingIds = dtoList
+                .Where(x => x.Id.HasValue && x.Id != Guid.Empty)
+                .Select(x => x.Id.Value)
+                .ToList();
+
+            // =========================
+            // UPDATE + INSERT
+            // =========================
+            foreach (var dto in dtoList)
+            {
+                if (dto.Id.HasValue && dto.Id != Guid.Empty)
+                {
+                    var entity = existing.FirstOrDefault(x => x.Id == dto.Id);
+
+                    if (entity != null)
+                    {
+                        entity.Date = dto.Date;
+                        entity.SupportingNo = dto.SupportingNo;
+                        entity.Particulars = dto.Particulars;
+                        entity.PaymentMode = dto.PaymentMode;
+                        entity.Amount = dto.Amount;
+                        entity.Remarks = dto.Remarks;
+                        entity.Screenshot = dto.Screenshot;
+                        entity.ModifiedAt = DateTime.UtcNow;
+                        entity.ModifiedBy = "SYSTEM";
+
+                        entity.IsDeleted = false;
+                    }
+                }
+                else
+                {
+                    travel.Domestics.Add(new Domestic
+                    {
+                        Id = Guid.NewGuid(),
+                        TravelId = travel.TravelId,
+                        Date = dto.Date,
+                        SupportingNo = dto.SupportingNo,
+                        Particulars = dto.Particulars,
+                        PaymentMode = dto.PaymentMode,
+                        Amount = dto.Amount,
+                        Remarks = dto.Remarks,
+                        Screenshot = dto.Screenshot,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = "SYSTEM",
+                        IsDeleted = false
+                    });
+                }
+            }
+
+            // =========================
+            // SOFT DELETE
+            // =========================
+            var toDelete = existing
+                .Where(x => !incomingIds.Contains(x.Id))
+                .ToList();
+
+            foreach (var item in toDelete)
+            {
+                item.IsDeleted = true;
+                item.DeletedAt = DateTime.UtcNow;
+                item.DeletedBy = "SYSTEM";
+            }
+
+            // =========================
+            // SAVE ONLY ONCE (IMPORTANT)
+            // =========================
+            await _recentClaimRepository.SaveChangesAsync();
+
+            return true;
         }
 
         /// <summary>

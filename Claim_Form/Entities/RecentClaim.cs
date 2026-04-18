@@ -1,13 +1,16 @@
-﻿namespace Claim_Form.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Claim_Form.Entities
 {
     /// <summary>
     /// Represents a claim created by an employee.
     /// </summary>
-    public class RecentClaim
+    public class RecentClaim:AuditInfo
     {
         /// <summary>
         /// Unique identifier for the claim.
         /// </summary>
+         [Key]
         public Guid RecentClaimId { get; set; }
 
         /// <summary>

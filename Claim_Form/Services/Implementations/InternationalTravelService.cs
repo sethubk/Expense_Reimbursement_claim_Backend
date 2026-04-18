@@ -2,6 +2,7 @@
 using Claim_Form.Data;
 using Claim_Form.Dtos;
 using Claim_Form.Entities;
+using Claim_Form.Repositories.Implementations;
 using Claim_Form.Repositories.Interface;
 using Claim_Form.Services.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +49,6 @@ namespace Claim_Form.Services.Implementations
 
             var travel = claim.TravelDetails;
 
-            _context.ChangeTracker.Clear();
             if (travel == null)
             {
                 travel = new TravelDetails
@@ -74,7 +74,6 @@ namespace Claim_Form.Services.Implementations
             }
             // =========================
             // UPDATE MASTER
-            // =========================
             travel.CurrencyType = dto.CurrencyType;
             travel.TravelStartDate = dto.TravelStartDate;
             travel.TravelEndDate = dto.TravelEndDate;
@@ -86,7 +85,7 @@ namespace Claim_Form.Services.Implementations
                 .ToList();
 
             var incomingIds = dto.CardCashEntries
-                .Where(x => x.Id != null && x.Id != Guid.Empty)
+                .Where(x => x.Id.HasValue && x.Id != Guid.Empty)
                 .Select(x => x.Id.Value)
                 .ToList();
 
@@ -95,9 +94,9 @@ namespace Claim_Form.Services.Implementations
             // =========================
             foreach (var item in dto.CardCashEntries)
             {
-                if (item.Id != null && item.Id != Guid.Empty)
+                // UPDATE
+                if (item.Id.HasValue && item.Id != Guid.Empty)
                 {
-                    // ✅ ONLY USE TRACKED ENTITY
                     var existing = existingEntries
                         .FirstOrDefault(x => x.Id == item.Id);
 
@@ -107,25 +106,25 @@ namespace Claim_Form.Services.Implementations
                         existing.PaymentType = item.PaymentType;
                         existing.InrRate = item.InrRate;
                         existing.TotalLoadedAmount = item.TotalLoadedAmount;
-
-                        existing.ModifiedAt = DateTime.UtcNow;
-                        existing.ModifiedBy = "SYSTEM";
+                        await _travelRepository.UpdateCashInfoAsync(existing);
                     }
+                    
                 }
+                // INSERT
                 else
                 {
-                    // ✅ INSERT
-                    travel.CardCashEntries.Add(new CashInfo
+                    var newEntity = new CashInfo
                     {
                         Id = Guid.NewGuid(),
-                        TravelId = travel.TravelId, // MUST
+                        TravelId=travel.TravelId,
                         LoadedDate = item.LoadedDate,
                         PaymentType = item.PaymentType,
                         InrRate = item.InrRate,
                         TotalLoadedAmount = item.TotalLoadedAmount,
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "SYSTEM"
-                    });
+                        IsDeleted = false
+                    };
+
+                    await _travelRepository.AddCashInfoAsync(newEntity);
                 }
             }
 
@@ -138,15 +137,18 @@ namespace Claim_Form.Services.Implementations
 
             foreach (var item in toDelete)
             {
+               
                 item.IsDeleted = true;
                 item.DeletedAt = DateTime.UtcNow;
                 item.DeletedBy = "SYSTEM";
+                await _travelRepository.UpdateCashInfoAsync(item);
             }
 
             // =========================
-            // SAVE
+            // SAVE ONCE ONLY
             // =========================
-            await _context.SaveChangesAsync();
+            await _travelRepository.SaveChangesAsync();
+
 
             return _mapper.Map<TravelDetailsDto>(travel);
         }

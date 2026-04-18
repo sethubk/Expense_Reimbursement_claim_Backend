@@ -106,7 +106,7 @@ namespace Claim_Form.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(
             [FromRoute] Guid cliamid,
-            [FromBody] DomesticDto input)
+            [FromBody] List<DomesticDto> input)
         {
             if (cliamid == Guid.Empty)
                 return BadRequest("Invalid international expense id.");

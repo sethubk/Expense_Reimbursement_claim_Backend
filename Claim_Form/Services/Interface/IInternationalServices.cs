@@ -30,7 +30,9 @@ namespace Claim_Form.Services.Interface
         /// <param name="id">International expense identifier.</param>
         /// <param name="dto">Updated international expense data.</param>
         /// <returns>Updated international expense if found; otherwise null.</returns>
-        Task<InternationalDto?> UpdateInternationalAsync(Guid id, InternationalDto dto);
+        Task<bool> UpdateInternationalAsync(
+      Guid claimId,
+      List<InternationalDto> dtoList);
 
         /// <summary>
         /// Deletes an international expense by its identifier.

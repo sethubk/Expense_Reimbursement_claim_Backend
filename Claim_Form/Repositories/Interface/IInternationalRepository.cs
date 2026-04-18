@@ -18,7 +18,7 @@ namespace Claim_Form.Repositories.Interface
         /// Updates an existing international expense.
         /// </summary>
         /// <param name="expense">International expense entity.</param>
-        Task UpdateAsync(International expense);
+        //Task UpdateAsync(International expense);
 
         /// <summary>
         /// Deletes an international expense by its identifier.
@@ -26,6 +26,10 @@ namespace Claim_Form.Repositories.Interface
         /// <param name="id">International expense identifier.</param>
         Task DeleteAsync(Guid id);
         Task DeleteExpenseAsync(Guid id);
+        Task<International?> GetById(Guid id);
+        Task AddAsync(International entity);
+        Task UpdateAsync(International entity);
+        Task SaveChangesAsync();
 
         /// <summary>
         /// Adds multiple international expense entries in a single operation.

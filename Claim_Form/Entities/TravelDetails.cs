@@ -5,7 +5,7 @@ namespace Claim_Form.Entities
     /// <summary>
     /// Represents travel details associated with a claim.
     /// </summary>
-    public class TravelDetails
+    public class TravelDetails:AuditInfo
     {
         /// <summary>
         /// Unique identifier for the travel details record.

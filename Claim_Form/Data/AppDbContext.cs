@@ -81,6 +81,18 @@ namespace Claim_Form.Data
             modelBuilder.Entity<Expense>()
     .HasQueryFilter(e => !e.IsDeleted);
 
+            modelBuilder.Entity<International>()
+                          .HasQueryFilter(e => !e.IsDeleted);
+
+
+            modelBuilder.Entity<TravelDetails>()
+                          .HasQueryFilter(e => !e.IsDeleted);
+
+            modelBuilder.Entity<Domestic>()
+                          .HasQueryFilter(e => !e.IsDeleted);
+
+            modelBuilder.Entity<CashInfo>()
+                         .HasQueryFilter(e => !e.IsDeleted);
             // RecentClaim → TravelDetails (One-to-One)
             modelBuilder.Entity<RecentClaim>()
                 .HasOne(rc => rc.TravelDetails)
@@ -115,7 +127,7 @@ namespace Claim_Form.Data
             // 👇 HERE is where you use it
             var user = _httpContextAccessor.HttpContext?
                 .User?.FindFirst("EmpCode")?.Value
-                ?? "SYSTEM";
+                ?? "sethu";
 
             foreach (var entry in ChangeTracker.Entries<AuditInfo>())
             {
