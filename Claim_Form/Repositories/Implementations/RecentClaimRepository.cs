@@ -152,9 +152,11 @@ namespace Claim_Form.Repositories.Implementations
         /// <param name="claim">Claim entity.</param>
         public async Task<List<RecentClaim?>>GetAllPendingClaims()
         {
-            return await _context.RecentClaims.Include(c => c.Employee).Where(c => c.Status =="pending")
-
-                 .ToListAsync();
+            return await _context.RecentClaims
+         .Include(c => c.Employee)
+         .Where(c => c.Status != "Draft") // optional
+         .OrderByDescending(c => c.Date)
+         .ToListAsync();
         }
 
         public async Task SaveChangesAsync()

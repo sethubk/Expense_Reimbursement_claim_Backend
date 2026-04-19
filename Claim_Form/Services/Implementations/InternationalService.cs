@@ -45,10 +45,7 @@ namespace Claim_Form.Services.Implementations
 
             if (claim == null || claim.TravelDetails == null)
                 throw new InvalidOperationException("Claim or travel details not found.");
-            if (claim.TravelDetails.Internationals.Any())
-            {
-                await _internationalRepository.DeleteExpenseAsync(claimId);
-            }
+          
             var travel = claim.TravelDetails;
 
             var expenses = entries.Select(e => new International
@@ -89,7 +86,7 @@ namespace Claim_Form.Services.Implementations
             var created= await _internationalTravelRepository
                 .UpdateReimbursementStatusAsync(travel.TravelId, reimbursementStatus);
 
-            return _mapper.Map<List<InternationalDto>>(created);
+            return _mapper.Map<List<InternationalDto>>(created.Internationals);
         }
 
         /// <summary>
@@ -130,9 +127,7 @@ namespace Claim_Form.Services.Implementations
                 .Select(x => x.Id.Value)
                 .ToList();
 
-            // =========================
-            // UPDATE + INSERT
-            // =========================
+           
             foreach (var dto in dtoList)
             {
                 if (dto.Id.HasValue && dto.Id != Guid.Empty)
@@ -151,10 +146,7 @@ namespace Claim_Form.Services.Implementations
                         entity.Remarks = dto.Remarks;
                         entity.Screenshot = dto.Screenshot;
 
-                        entity.ModifiedAt = DateTime.UtcNow;
-                        entity.ModifiedBy = "SYSTEM";
-
-                        entity.IsDeleted = false;
+                   
 
                         await _internationalRepository.UpdateAsync(entity);
                     }
@@ -174,18 +166,14 @@ namespace Claim_Form.Services.Implementations
                         ConvertedAmount = dto.ConvertedAmount,
                         Remarks = dto.Remarks,
                         Screenshot = dto.Screenshot,
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "SYSTEM",
-                        IsDeleted = false
+                       
                     };
 
                     await _internationalRepository.AddAsync(newEntity);
                 }
             }
 
-            // =========================
-            // SOFT DELETE
-            // =========================
+            
             var toDelete = existing
                 .Where(x => !incomingIds.Contains(x.Id))
                 .ToList();
@@ -194,14 +182,11 @@ namespace Claim_Form.Services.Implementations
             {
                 item.IsDeleted = true;
                 item.DeletedAt = DateTime.UtcNow;
-                item.DeletedBy = "SYSTEM";
+               
 
                 await _internationalRepository.UpdateAsync(item);
             }
 
-            // =========================
-            // SINGLE SAVE CALL
-            // =========================
             await _internationalRepository.SaveChangesAsync();
 
             var updatedTravel = await _recentClaimRepository.GetByIdAsync(claimId);
@@ -221,9 +206,7 @@ namespace Claim_Form.Services.Implementations
                     ? $"Amount Recover from Employee: ₹{Math.Abs(difference)}"
                 : "Settled";
 
-            // =========================
-            // UPDATE TRAVEL DETAILS
-            // =========================
+
             updatedTravel.TravelDetails.ReimbursementStatus = reimbursementStatus;
 
             await _internationalTravelRepository.SaveChangesAsync();

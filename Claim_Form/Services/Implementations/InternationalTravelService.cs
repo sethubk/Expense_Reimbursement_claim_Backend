@@ -72,8 +72,7 @@ namespace Claim_Form.Services.Implementations
                 await _travelRepository.AddAsync(travel);
                 return dto;
             }
-            // =========================
-            // UPDATE MASTER
+           
             travel.CurrencyType = dto.CurrencyType;
             travel.TravelStartDate = dto.TravelStartDate;
             travel.TravelEndDate = dto.TravelEndDate;
@@ -89,9 +88,7 @@ namespace Claim_Form.Services.Implementations
                 .Select(x => x.Id.Value)
                 .ToList();
 
-            // =========================
-            // UPDATE + INSERT
-            // =========================
+            
             foreach (var item in dto.CardCashEntries)
             {
                 // UPDATE
@@ -128,9 +125,7 @@ namespace Claim_Form.Services.Implementations
                 }
             }
 
-            // =========================
-            // SOFT DELETE
-            // =========================
+       
             var toDelete = existingEntries
                 .Where(x => !incomingIds.Contains(x.Id))
                 .ToList();
@@ -140,77 +135,18 @@ namespace Claim_Form.Services.Implementations
                
                 item.IsDeleted = true;
                 item.DeletedAt = DateTime.UtcNow;
-                item.DeletedBy = "SYSTEM";
+              
                 await _travelRepository.UpdateCashInfoAsync(item);
             }
 
-            // =========================
-            // SAVE ONCE ONLY
-            // =========================
+           
             await _travelRepository.SaveChangesAsync();
 
 
             return _mapper.Map<TravelDetailsDto>(travel);
         }
 
-        // ✅ Return updated DTO
-        //return new TravelDetailsDto
-        //{
-        //    CurrencyType = travel.CurrencyType,
-        //    TravelStartDate = travel.TravelStartDate,
-        //    TravelEndDate = travel.TravelEndDate,
-        //    TotalDays = travel.TotalDays,
-        //    AdvanceAmount = travel.AdvanceAmount,
-        //    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
-        //    {
-        //        LoadedDate = c.LoadedDate,
-        //        PaymentType = c.PaymentType,
-        //        InrRate = c.InrRate,
-        //        TotalLoadedAmount = c.TotalLoadedAmount
-        //    }).ToList()
-        //};
-
-
-    //    public async Task<TravelDetailsDto> UpdateTravelDetailsAsync(
-    //Guid claimId,
-    //TravelInputDto dto)
-    //    {
-    //        var travel = await _travelRepository.GetByClaimIdAsync(claimId);
-    //        travel.CurrencyType = dto.CurrencyType;
-    //        travel.TravelStartDate = dto.TravelStartDate;
-    //        travel.TravelEndDate = dto.TravelEndDate;
-    //        travel.TotalDays = dto.TotalDays;
-    //        travel.AdvanceAmount = dto.AdvanceAmount;
-    //        travel.ReimbursementStatus = "Pending";
-
-
-
-
-    //        foreach (var entry in dto.CardCashEntries)
-    //        {
-    //            var exiting = travel.CardCashEntries.FirstOrDefault(x => x.Id == entry.id);
-    //            if(exiting == null)
-    //            {
-    //                travel.CardCashEntries.Add(new CashInfo
-    //                {
-    //                    LoadedDate = entry.LoadedDate,
-    //                    PaymentType = entry.PaymentType,
-    //                    InrRate = entry.InrRate,
-    //                    TotalLoadedAmount = entry.TotalLoadedAmount
-    //                });
-    //            }
-
-    //            else
-    //            {
-
-    //            }
-    //        }
-
-
-    //        await _travelRepository.UpdateAsync(travel);
-
-    //        return _mapper.Map<TravelDetailsDto>(travel);
-    //    }
+        
 
         /// <summary>
         /// Retrieves travel details by claim identifier.
@@ -222,21 +158,7 @@ namespace Claim_Form.Services.Implementations
             if (travel == null)
                 return null;
 
-            //return new TravelDetailsDto
-            //{
-            //    CurrencyType = travel.CurrencyType,
-            //    TravelStartDate = travel.TravelStartDate,
-            //    TravelEndDate = travel.TravelEndDate,
-            //    TotalDays = travel.TotalDays,
-            //    AdvanceAmount = travel.AdvanceAmount,
-            //    CardCashEntries = travel.CardCashEntries.Select(c => new CashInfoDto
-            //    {
-            //        LoadedDate = c.LoadedDate,
-            //        PaymentType = c.PaymentType,
-            //        InrRate = c.InrRate,
-            //        TotalLoadedAmount = c.TotalLoadedAmount
-            //    }).ToList()
-            //};
+         
             return _mapper.Map<TravelDetailsDto>(travel);
 
         }

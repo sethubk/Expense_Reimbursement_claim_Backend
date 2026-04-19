@@ -48,10 +48,7 @@ namespace Claim_Form.Services.Implementations
             if (claim == null)
                 throw new InvalidOperationException("Claim not found.");
 
-            if (claim.Expenses.Any())
-            {
-                await _expenseRepository.DeleteAsync(claimId);
-            }
+            
 
 
            
@@ -206,7 +203,7 @@ namespace Claim_Form.Services.Implementations
         //}
         public async Task<bool> UpdateExpenseAsync(Guid claimId, List<ExpenseDto> expenses)
         {
-            // 🔥 Always load with tracking
+          
             var claim = await _recentClaimRepository.GetByIdAsync(claimId);
 
             if (claim == null)
@@ -216,17 +213,12 @@ namespace Claim_Form.Services.Implementations
                 .Where(x => !x.IsDeleted)
                 .ToList();
 
-            // =========================
-            // GET IDS FROM FRONTEND
-            // =========================
+            
             var incomingIds = expenses
                 .Where(x => x.Id.HasValue && x.Id != Guid.Empty)
                 .Select(x => x.Id.Value)
                 .ToList();
 
-            // =========================
-            // 1️⃣ UPDATE + INSERT
-            // =========================
             foreach (var dto in expenses)
             {
                 if (dto.Id.HasValue && dto.Id != Guid.Empty)
@@ -243,8 +235,6 @@ namespace Claim_Form.Services.Implementations
                     exp.Remarks = dto.Remarks;
                     exp.Screenshot = dto.Screenshot;
 
-                    exp.ModifiedAt = DateTime.UtcNow;
-                    exp.ModifiedBy = "SYSTEM";
 
                     await _expenseRepository.UpdateAsync(exp);
                 }
@@ -252,7 +242,7 @@ namespace Claim_Form.Services.Implementations
                 {
                     var newExpense = new Expense
                     {
-                        Id = Guid.NewGuid(), // ✅ IMPORTANT
+                        Id = Guid.NewGuid(),
                         RecentClaimId = claimId,
                         Date = dto.Date,
                         SupportingNo = dto.SupportingNo,
@@ -261,16 +251,14 @@ namespace Claim_Form.Services.Implementations
                         Amount = dto.Amount,
                         Remarks = dto.Remarks,
                         Screenshot = dto.Screenshot,
-                        CreatedAt = DateTime.UtcNow
+                      
                     };
 
                     await _expenseRepository.AddAsync(newExpense);
                 }
             }
 
-            // =========================
-            // SOFT DELETE
-            // =========================
+            
             foreach (var exp in existingExpenses)
             {
                 if (!incomingIds.Contains(exp.Id))
@@ -286,9 +274,7 @@ namespace Claim_Form.Services.Implementations
                 }
             }
 
-            // =========================
-            // SAVE
-            // =========================
+
             await _expenseRepository.SaveChangesAsync();
 
             return true;

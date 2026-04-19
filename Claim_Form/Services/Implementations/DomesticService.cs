@@ -131,9 +131,6 @@ namespace Claim_Form.Services.Implementations
                 .Select(x => x.Id.Value)
                 .ToList();
 
-            // =========================
-            // UPDATE + INSERT
-            // =========================
             foreach (var dto in dtoList)
             {
                 if (dto.Id.HasValue && dto.Id != Guid.Empty)
@@ -152,10 +149,6 @@ namespace Claim_Form.Services.Implementations
                         entity.Remarks = dto.Remarks;
                         entity.Screenshot = dto.Screenshot;
 
-                        entity.ModifiedAt = DateTime.UtcNow;
-                        entity.ModifiedBy = "SYSTEM";
-
-                        entity.IsDeleted = false;
 
                         await _domesticrepository.UpdateAsync(entity);
                     }
@@ -175,18 +168,14 @@ namespace Claim_Form.Services.Implementations
                      
                         Remarks = dto.Remarks,
                         Screenshot = dto.Screenshot,
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "SYSTEM",
-                        IsDeleted = false
+                       
                     };
 
                     await _domesticrepository.AddAsync(newEntity);
                 }
             }
 
-            // =========================
-            // SOFT DELETE
-            // =========================
+           
             var toDelete = existing
                 .Where(x => !incomingIds.Contains(x.Id))
                 .ToList();
@@ -200,9 +189,6 @@ namespace Claim_Form.Services.Implementations
                 await _domesticrepository.UpdateAsync(item);
             }
 
-            // =========================
-            // SINGLE SAVE CALL
-            // =========================
             await _domesticrepository.SaveChangesAsync();
 
             var updatedTravel = await _recentClaimRepository.GetByIdAsync(id);
@@ -222,9 +208,7 @@ namespace Claim_Form.Services.Implementations
                     ? $"Amount Recover from Employee: ₹{Math.Abs(difference)}"
                 : "Settled";
 
-            // =========================
-            // UPDATE TRAVEL DETAILS
-            // =========================
+         
             updatedTravel.TravelDetails.ReimbursementStatus = reimbursementStatus;
 
             await _internationalTravelRepository.SaveChangesAsync();
