@@ -1,5 +1,6 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Claim_Form.Controllers
@@ -26,6 +27,8 @@ namespace Claim_Form.Controllers
         /// <param name="entries">List of international expense entries.</param>
         /// <returns>Created international expenses.</returns>
         ///  // POST api/International/ClaimID/international
+        ///  
+        [Authorize]
         [HttpPost("{ClaimId}/InternationalExpense")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -98,6 +101,8 @@ namespace Claim_Form.Controllers
         /// <param name="input">Updated international expense data.</param>
         /// <returns>Updated international expense.</returns>
         ///  Put api/International/ClaimID/international
+        ///  
+        [Authorize]
         [HttpPut("{ClaimId}/International")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

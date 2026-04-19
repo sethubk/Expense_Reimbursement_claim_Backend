@@ -124,10 +124,10 @@ namespace Claim_Form.Data
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            // 👇 HERE is where you use it
-            var user = _httpContextAccessor.HttpContext?
-                .User?.FindFirst("EmpCode")?.Value
-                ?? "sethu";
+           
+            var user = _httpContextAccessor.HttpContext?.User?
+    .FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+    ?? "SYSTEM";
 
             foreach (var entry in ChangeTracker.Entries<AuditInfo>())
             {
@@ -143,12 +143,12 @@ namespace Claim_Form.Data
                         entry.Entity.ModifiedBy = user;
                         break;
 
-                    //case EntityState.Deleted:
-                    //    entry.State = EntityState.Modified;
-                    //    entry.Entity.IsDeleted = true;
-                    //    entry.Entity.DeletedAt = DateTime.UtcNow;
-                    //    entry.Entity.DeletedBy = user;
-                    //    break;
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Modified;
+                        entry.Entity.IsDeleted = true;
+                        entry.Entity.DeletedAt = DateTime.UtcNow;
+                        entry.Entity.DeletedBy = user;
+                        break;
                 }
             }
 

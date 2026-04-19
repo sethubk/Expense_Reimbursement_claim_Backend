@@ -68,8 +68,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        };
    });
 
-builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-                .AddNegotiate();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
 // ----------------------
 // SWAGGER MUST BE HERE!

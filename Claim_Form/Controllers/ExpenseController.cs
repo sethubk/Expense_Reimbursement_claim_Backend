@@ -1,5 +1,6 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -27,6 +28,8 @@ namespace Claim_Form.Controllers
         /// <param name="entries">List of expense entries.</param>
         /// <returns>Created expense entries.</returns>
         /// // POST api/Expense/ID/Expense
+        /// 
+        [Authorize]
         [HttpPost("{claimId}/Expense")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expenses created successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input data.")]
@@ -97,6 +100,8 @@ namespace Claim_Form.Controllers
         /// <param name="input">Ipdated expense data.</param>
         /// <returns>Updated expense.</returns>\
         ///  // Put api/recentClaim/ID/Expense
+        ///  
+        [Authorize]
         [HttpPut("{ClaimId}/Expense")]
         [SwaggerResponse(StatusCodes.Status200OK, "Expense updated successfully.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request.")]

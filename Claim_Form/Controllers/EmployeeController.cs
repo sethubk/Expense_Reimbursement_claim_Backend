@@ -1,5 +1,6 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -31,7 +32,8 @@ namespace Claim_Form.Controllers
         /// <response code="400">Invalid request payload.</response>
         /// <response code="401">Invalid email or password.</response>
         /// <response code="500">Internal server error.</response>
-         // post api/Employee
+        // post api/Employee
+        [AllowAnonymous]
         [HttpPost]
         [SwaggerResponse(200, "Success", typeof(EmployeeResponseDto))]
         [SwaggerResponse(400, "Bad Request")]

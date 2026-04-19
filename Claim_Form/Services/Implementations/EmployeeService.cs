@@ -59,8 +59,10 @@ namespace Claim_Form.Services.Implementations
             //    VendorCost = employee.VendorCost,
             //    CostCenter = employee.CostCenter
             //};
-           return _mapper.Map<EmployeeResponseDto>(employee);
-            
+           var emp= _mapper.Map<EmployeeResponseDto>(employee);
+            emp.Token = token;
+            return emp;
+
         }
 
         /// <summary>

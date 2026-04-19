@@ -1,5 +1,6 @@
 ﻿using Claim_Form.Dtos;
 using Claim_Form.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -60,6 +61,7 @@ namespace Claim_Form.Controllers
         /// <param name="employeeCode">Employee code.</param>
         /// <returns>Created claim.</returns>
         // POST api/recentClaim/<employeeCode>/claim
+        [Authorize]
         [HttpPost("{employeeCode}/claim")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]
@@ -100,6 +102,7 @@ namespace Claim_Form.Controllers
         /// <param name="claimId">Claim identifier.</param>
         /// <returns>Updated claim.</returns>
         // PUT api/recentClaim/<employeeCode>/<claimId>/claim 
+        [Authorize]
         [HttpPut("{employeeCode}/{claimId}/claim")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]
@@ -142,6 +145,7 @@ namespace Claim_Form.Controllers
         /// <param name="employeeCode">Employee code.</param>
         /// <returns>Employee claims.</returns>
         //  // get api/recentClaim/ID/Expense
+        [Authorize]
         [HttpGet("{employeeCode}/claims")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]
@@ -207,10 +211,11 @@ namespace Claim_Form.Controllers
         /// Updates an existing claim for a specific employee.
         /// </summary>
         /// <param name="input">Updated claim details.</param>
-       
+
         /// <param name="claimId">Claim identifier.</param>
         /// <returns>Updated claim.</returns>
         // PUT api/recentClaim/<employeeCode>/<claimId>/claim 
+        [Authorize]
         [HttpPut("{claimId}/claimstatus")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]

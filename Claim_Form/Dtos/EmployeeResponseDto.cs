@@ -40,5 +40,7 @@
         /// Cost center associated with the employee.
         /// </summary>
         public string CostCenter { get; set; } = string.Empty;
+
+        public string Token { get; set; }
     }
 }
